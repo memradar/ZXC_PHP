@@ -15,8 +15,10 @@ abstract class Factory {
 
     public static function getInstance() {
         $className = static::getClassName();
-        if ( !( self::$instances[$className] instanceof $className ) ) {
-            self::$instances[$className] = new $className();
+        if ( !isset( self::$instances[$className] ) ) {
+//            if ( !( self::$instances[$className] instanceof $className ) ) {
+                self::$instances[$className] = new $className();
+//            }
         }
         return self::$instances[$className];
     }

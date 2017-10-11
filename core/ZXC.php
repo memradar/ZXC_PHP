@@ -8,7 +8,9 @@
 
 namespace ZXC;
 
+require_once 'Factory.php';
 
-class ZXC extends \ZXC\Factory {
+
+class ZXC extends Factory {
 
 }
