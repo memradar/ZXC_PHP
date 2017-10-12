@@ -9,6 +9,6 @@
 namespace ZXC;
 
 
-class DB extends \ZXC\Factory {
+class DB extends Factory {
 
 }

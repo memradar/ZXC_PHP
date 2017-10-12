@@ -10,7 +10,10 @@ namespace ZXC;
 
 require_once 'Factory.php';
 
-
 class ZXC extends Factory {
+    protected $routes = [];
+    protected function __construct() {
 
+    }
 }
+spl_autoload_register( [ 'ZXC\ZXC', 'autoload' ], true, true );

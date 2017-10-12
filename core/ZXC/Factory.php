@@ -16,9 +16,7 @@ abstract class Factory {
     public static function getInstance() {
         $className = static::getClassName();
         if ( !isset( self::$instances[$className] ) ) {
-//            if ( !( self::$instances[$className] instanceof $className ) ) {
-                self::$instances[$className] = new $className();
-//            }
+            self::$instances[$className] = new $className();
         }
         return self::$instances[$className];
     }
@@ -32,6 +30,12 @@ abstract class Factory {
 
     final protected static function getClassName() {
         return get_called_class();
+    }
+
+    public static function autoload( $className ) {
+        $file = str_replace('\\', DIRECTORY_SEPARATOR, $className);
+        $file = ZXC_ROOT .DIRECTORY_SEPARATOR. $file .'.php';
+        require_once $file;
     }
 
     protected function __construct() {

@@ -9,5 +9,8 @@ $config = [
     ],
     'AUTH' => [
         'field' => [ 'login', 'password' ]
+    ],
+    'ZXC'=>[
+        'version'=> '0.0.1-a'
     ]
 ];
