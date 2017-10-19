@@ -1,5 +1,5 @@
 <?php
-$config = [
+return $config = [
     'DB' => [
         'HOST' => 'localhost',
         'PORT' => 5432,

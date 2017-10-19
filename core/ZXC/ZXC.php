@@ -12,8 +12,18 @@ require_once 'Factory.php';
 
 class ZXC extends Factory {
     protected $routes = [];
-    protected function __construct() {
+
+    protected function __construct($params) {
+
+    }
+
+    public function set( $key, $val ) {
+        $this[$key] = $val;
+    }
+
+    public function get( $key ) {
 
     }
 }
+
 spl_autoload_register( [ 'ZXC\ZXC', 'autoload' ], true, true );
