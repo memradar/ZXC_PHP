@@ -33,9 +33,21 @@ abstract class Factory {
     }
 
     public static function autoload( $className ) {
-        $file = str_replace('\\', DIRECTORY_SEPARATOR, $className);
-        $file = ZXC_ROOT .DIRECTORY_SEPARATOR. $file .'.php';
+        $file = str_replace( '\\', DIRECTORY_SEPARATOR, $className );
+        $file = ZXC_ROOT . DIRECTORY_SEPARATOR . $file . '.php';
         require_once $file;
+    }
+
+    public function set( $key, $value ) {
+        $this->$key = $value;
+    }
+
+    public function get( $key ) {
+        if ( isset( $this->$key ) ) {
+            return $this->$key;
+        } else {
+            return null;
+        }
     }
 
     protected function __construct() {

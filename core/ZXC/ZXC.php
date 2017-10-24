@@ -10,19 +10,20 @@ namespace ZXC;
 
 require_once 'Factory.php';
 
+
 class ZXC extends Factory {
-    protected $routes = [];
+    private $router = null;
 
-    protected function __construct($params) {
-
+    protected function __construct() {
+        $this->router = Router::getInstance();
     }
 
-    public function set( $key, $val ) {
-        $this[$key] = $val;
-    }
-
-    public function get( $key ) {
-
+    public function registerRoutes( $routes = [] ) {
+        if ( !$this->router || !$routes ) {
+            return false;
+        }
+        $this->router->registerRoutes( $routes );
+        return true;
     }
 }
 
