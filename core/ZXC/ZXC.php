@@ -12,10 +12,12 @@ require_once 'Factory.php';
 
 
 class ZXC extends Factory {
-    private $router = null;
+    private $router;
+    private $main = [];
 
     protected function __construct() {
-        $this->router = Router::getInstance();
+        $this->router = Router::getInstance( 'fds' );
+        $this->fillMain();
     }
 
     public function registerRoutes( $routes = [] ) {
@@ -24,6 +26,17 @@ class ZXC extends Factory {
         }
         $this->router->registerRoutes( $routes );
         return true;
+    }
+
+    private function fillMain() {
+        $this->main['URI'] = &$_SERVER['REQUEST_URI'];
+        $this->main['HOST'] = $_SERVER['SERVER_NAME'];
+        $this->main['METHOD'] = $_SERVER['REQUEST_METHOD'];
+        $this->main['BASE_ROUTE'] = dirname( $_SERVER['SCRIPT_NAME'] );
+    }
+
+    public function go() {
+
     }
 }
 

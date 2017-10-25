@@ -10,7 +10,7 @@ namespace ZXC;
 
 
 class DB {
-    private $db = null;
+    private $db /*= null*/;
     private $dbType = null;
     private $persistent = null;
 

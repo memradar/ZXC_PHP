@@ -13,10 +13,14 @@ abstract class Factory {
 
     protected static $instances = [];
 
-    public static function getInstance() {
+    public static function getInstance( $params = null ) {
         $className = static::getClassName();
         if ( !isset( self::$instances[$className] ) ) {
-            self::$instances[$className] = new $className();
+            if ( $params ) {
+                self::$instances[$className] = new $className( $params );
+            } else {
+                self::$instances[$className] = new $className();
+            }
         }
         return self::$instances[$className];
     }

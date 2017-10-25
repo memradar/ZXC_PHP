@@ -19,20 +19,43 @@ class Router extends Factory {
         if ( $routes ) {
             foreach ( $routes as $route ) {
                 if ( isset( $route['route'] ) ) {
-                    preg_match_all( '/(([\w\/:]*)+[^|:])/', $route['route'], $params, PREG_PATTERN_ORDER );
-                    if ( !$params || count( $params ) < 2 ) {
-                        throw new \Exception( 'Route is not valid! Must be like this \'POST|/test/:route/|Class:method\'' );
+                    $parsedRoute = $this->parseRoute( $route );
+                    if ( isset( $this->routeTypes[$parsedRoute['type']] ) && $this->routeTypes[$parsedRoute['type']] === true ) {
+                        $this->routes[$parsedRoute['type']][$parsedRoute['route']] = $parsedRoute;
                     }
-                    $stop = $params;
-                    $this->routes['df'] = 1;
                 }
             }
-        } else {
-            $stop = false;
         }
     }
 
-    public function disableRouterType() {
+    private function parseRoute( $route ) {
+        preg_match_all( '/(([\w\/:]*)+[^|:])/', $route['route'], $params, PREG_PATTERN_ORDER );
+        if ( !$params || count( $params ) < 2 ) {
+            throw new \Exception( 'Route is not valid! Must be like this \'POST|/test/:route/|Class:method\'' );
+        }
+        $classAndMethod = [];
+        if ( isset( $params[0][2] ) ) {
+            $classAndMethod = explode( isset( $params[0][2] ), ':' );
+        }
+        return [
+            'type' => $params[0][0],
+            'route' => $params[0][1],
+            'class' => isset( $classAndMethod[0] ) ? $classAndMethod[0] : null,
+            'method' => isset( $classAndMethod[1] ) ? $classAndMethod[1] : null,
+            'func' => isset( $route['call'] ) ? $route['call'] : null
+        ];
+    }
 
+    public function disableRouterType( $type ) {
+        $type = strtoupper( $type );
+        if ( isset( $this->routeTypes[$type] ) ) {
+            $this->routeTypes[$type] = false;
+            return true;
+        }
+        return false;
+    }
+
+    public function __construct( $r ) {
+        $this->as = $r;
     }
 }
