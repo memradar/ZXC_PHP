@@ -36,11 +36,17 @@ abstract class Factory {
         return get_called_class();
     }
 
-    public static function autoload( $className ) {
-        $file = str_replace( '\\', DIRECTORY_SEPARATOR, $className );
-        $file = ZXC_ROOT . DIRECTORY_SEPARATOR . $file . '.php';
-        require_once $file;
-    }
+//    public static function autoload( $className ) {
+//        $file = str_replace( '\\', DIRECTORY_SEPARATOR, $className );
+//        if(strpos($className,'ZXC') === 0){
+//            $file = ZXC_ROOT . DIRECTORY_SEPARATOR . $file . '.php';
+//        }else{
+//            $file = ZXC_ROOT . DIRECTORY_SEPARATOR . $file . '.php';
+//        }
+//
+//        if ( !is_file( $file ) ) return false;
+//        require_once $file;
+//    }
 
     public function set( $key, $value ) {
         $this->$key = $value;

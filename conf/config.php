@@ -12,5 +12,6 @@ return $config = [
     ],
     'ZXC'=>[
         'version'=> '0.0.1-a'
-    ]
+    ],
+    'AUTOLOAD'=>'../AUTOL'
 ];

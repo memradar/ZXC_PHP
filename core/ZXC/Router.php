@@ -29,20 +29,22 @@ class Router extends Factory {
     }
 
     private function parseRoute( $route ) {
-        preg_match_all( '/(([\w\/:]*)+[^|:])/', $route['route'], $params, PREG_PATTERN_ORDER );
+        preg_match_all( '/(([\w\/\\:]*)+[^|:])/', $route['route'], $params, PREG_PATTERN_ORDER );
         if ( !$params || count( $params ) < 2 ) {
             throw new \Exception( 'Route is not valid! Must be like this \'POST|/test/:route/|Class:method\'' );
         }
         $classAndMethod = [];
         if ( isset( $params[0][2] ) ) {
-            $classAndMethod = explode( isset( $params[0][2] ), ':' );
+            $classAndMethod = explode( ':', $params[0][2] );
         }
         return [
             'type' => $params[0][0],
             'route' => $params[0][1],
+            'reg' => $this->getRegex( $params[0][1] ),
             'class' => isset( $classAndMethod[0] ) ? $classAndMethod[0] : null,
             'method' => isset( $classAndMethod[1] ) ? $classAndMethod[1] : null,
-            'func' => isset( $route['call'] ) ? $route['call'] : null
+            'func' => isset( $route['call'] ) ? $route['call'] : null,
+            'params' => null
         ];
     }
 
@@ -55,7 +57,64 @@ class Router extends Factory {
         return false;
     }
 
-    public function __construct( $r ) {
-        $this->as = $r;
+    public function getCurrentRoutParams( $uri, $base, $method ) {
+        if ( !isset( $this->routes[$method] ) ) return null;
+        $path = substr( $uri, strlen( $base ) );
+        foreach ( $this->routes[$method] as &$route ) {
+            $ok = preg_match( $route['reg'], $path, $matches );
+            if ( $ok ) {
+                $params = array_intersect_key(
+                    $matches,
+                    array_flip(
+                        array_filter(
+                            array_keys( $matches ),
+                            'is_string'
+                        )
+                    )
+                );
+                if ( $params ) {
+                    $route['params'] = $params;
+                }
+                return $route;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param $pattern
+     * @return bool|string
+     * Thanks https://stackoverflow.com/questions/30130913/how-to-do-url-matching-regex-for-routing-framework/30359808#30359808
+     */
+    private function getRegex( $pattern ) {
+        if ( preg_match( '/[^-:\/_{}()a-zA-Z\d]/', $pattern ) )
+            return false; // Invalid pattern
+
+        // Turn "(/)" into "/?"
+        $pattern = preg_replace( '#\(/\)#', '/?', $pattern );
+
+        // Create capture group for ":parameter"
+        $allowedParamChars = '[a-zA-Z0-9\_\-]+';
+        $pattern = preg_replace(
+            '/:(' . $allowedParamChars . ')/',   # Replace ":parameter"
+            '(?<$1>' . $allowedParamChars . ')', # with "(?<parameter>[a-zA-Z0-9\_\-]+)"
+            $pattern
+        );
+
+        // Create capture group for '{parameter}'
+        $pattern = preg_replace(
+            '/{(' . $allowedParamChars . ')}/',    # Replace "{parameter}"
+            '(?<$1>' . $allowedParamChars . ')', # with "(?<parameter>[a-zA-Z0-9\_\-]+)"
+            $pattern
+        );
+
+        // Add start and end matching
+        $patternAsRegex = "@^" . $pattern . "$@D";
+
+        return $patternAsRegex;
+    }
+
+    public function __construct() {
+
     }
 }
