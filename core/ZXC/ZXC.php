@@ -11,17 +11,20 @@ namespace ZXC;
 require_once 'Factory.php';
 
 
-class ZXC extends Factory {
+class ZXC extends Factory
+{
     private $router;
     private $main = [];
 
-    protected function __construct() {
+    protected function __construct()
+    {
         spl_autoload_register( [ 'ZXC\ZXC', 'autoload' ], true, true );
         $this->fillMain();
         $this->router = Router::getInstance( 'fds' );
     }
 
-    public function registerRoutes( $routes = [] ) {
+    public function registerRoutes( $routes = [] )
+    {
         if ( !$this->router || !$routes ) {
             return false;
         }
@@ -29,7 +32,8 @@ class ZXC extends Factory {
         return true;
     }
 
-    private function fillMain() {
+    private function fillMain()
+    {
         $this->main['URI'] = &$_SERVER['REQUEST_URI'];
         $this->main['HOST'] = $_SERVER['SERVER_NAME'];
         $this->main['METHOD'] = &$_SERVER['REQUEST_METHOD'];
@@ -40,33 +44,51 @@ class ZXC extends Factory {
         $this->main['AUTOLOAD'] = '';
     }
 
-    public function set( $key, $val ) {
+    public function set( $key, $val )
+    {
         if ( isset( $this->main, $key ) ) {
             $this->main[$key] = $val;
         }
     }
 
-    public function go() {
+    public function go()
+    {
         $routeParams = $this->router->getCurrentRoutParams( $this->main['URI'], $this->main['BASE_ROUTE'], $this->main['METHOD'] );
-        if ( !$routeParams ) return false;
-        if ( is_subclass_of( $routeParams['class'], 'Factory' ) ) {
-            $stop = true;
-        } else {
-            $stop = false;
+        if ( !$routeParams ) return false; //TODO 404
+
+        if ( !$routeParams['class'] && !$routeParams['func'] && !is_callable( $routeParams['func'] ) ) {
+            return false; //TODO 404
         }
-        $class = new $routeParams['class'];
-        $class->$routeParams['method']();
+        ob_start();
+        if ( $routeParams['class'] ) {
+            if ( is_subclass_of( $routeParams['class'], 'ZXC\Factory', true ) ) {
+                $userClass = call_user_func( $routeParams['class'] . '::getInstance' );
+                call_user_func_array( [ $userClass, $routeParams['method'] ], [ $this, $routeParams['params'] ] );
+            } else {
+                if ( class_exists( $routeParams['class'] ) ) {
+                    $userClass = new $routeParams['class'];
+                    if ( method_exists( $userClass, $routeParams['method'] ) ) {
+                        call_user_func_array( [ $userClass, $routeParams['method'] ], [ $this, $routeParams['params'] ] );
+                    }
+                }
+            }
+        } else {
+            call_user_func_array( $routeParams['func'], [ $this, $routeParams['params'] ] );
+        }
+
+        $body = ob_get_clean();
+        echo $body;
+        return true;
     }
 
-    public function autoload( $className ) {
+    public function autoload( $className )
+    {
         $file = str_replace( '\\', DIRECTORY_SEPARATOR, $className );
         if ( strpos( $className, 'ZXC' ) === 0 ) {
             $file = ZXC_ROOT . DIRECTORY_SEPARATOR . $file . '.php';
         } else {
             $file = ZXC_ROOT . DIRECTORY_SEPARATOR . $this->main['AUTOLOAD'] . DIRECTORY_SEPARATOR . $file . '.php';
         }
-        if ( is_file( $file ) ) require_once $file;
+        if ( is_file( $file ) ) require $file;
     }
 }
-
-//spl_autoload_register( [ 'ZXC\ZXC', 'autoload' ], true, true );

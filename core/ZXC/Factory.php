@@ -9,11 +9,13 @@
 namespace ZXC;
 
 
-abstract class Factory {
+abstract class Factory
+{
 
     protected static $instances = [];
 
-    public static function getInstance( $params = null ) {
+    public static function getInstance( $params = null )
+    {
         $className = static::getClassName();
         if ( !isset( self::$instances[$className] ) ) {
             if ( $params ) {
@@ -25,34 +27,26 @@ abstract class Factory {
         return self::$instances[$className];
     }
 
-    public static function removeInstance() {
+    public static function removeInstance()
+    {
         $className = static::getClassName();
         if ( array_key_exists( $className, self::$instances ) ) {
             unset( self::$instances[$className] );
         }
     }
 
-    final protected static function getClassName() {
+    final protected static function getClassName()
+    {
         return get_called_class();
     }
 
-//    public static function autoload( $className ) {
-//        $file = str_replace( '\\', DIRECTORY_SEPARATOR, $className );
-//        if(strpos($className,'ZXC') === 0){
-//            $file = ZXC_ROOT . DIRECTORY_SEPARATOR . $file . '.php';
-//        }else{
-//            $file = ZXC_ROOT . DIRECTORY_SEPARATOR . $file . '.php';
-//        }
-//
-//        if ( !is_file( $file ) ) return false;
-//        require_once $file;
-//    }
-
-    public function set( $key, $value ) {
+    public function set( $key, $value )
+    {
         $this->$key = $value;
     }
 
-    public function get( $key ) {
+    public function get( $key )
+    {
         if ( isset( $this->$key ) ) {
             return $this->$key;
         } else {
@@ -60,15 +54,19 @@ abstract class Factory {
         }
     }
 
-    protected function __construct() {
+    protected function __construct()
+    {
     }
 
-    final protected function __clone() {
+    final protected function __clone()
+    {
     }
 
-    final protected function __sleep() {
+    final protected function __sleep()
+    {
     }
 
-    final protected function __wakeup() {
+    final protected function __wakeup()
+    {
     }
 }

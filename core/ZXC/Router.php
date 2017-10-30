@@ -8,14 +8,16 @@
 
 namespace ZXC;
 
-class Router extends Factory {
+class Router extends Factory
+{
     private $routes = [];
     private $routeTypes = [
         'POST' => true,
         'GET' => true
     ];
 
-    public function registerRoutes( $routes = [] ) {
+    public function registerRoutes( $routes = [] )
+    {
         if ( $routes ) {
             foreach ( $routes as $route ) {
                 if ( isset( $route['route'] ) ) {
@@ -28,19 +30,22 @@ class Router extends Factory {
         }
     }
 
-    private function parseRoute( $route ) {
-        preg_match_all( '/(([\w\/\\:]*)+[^|:])/', $route['route'], $params, PREG_PATTERN_ORDER );
+    private function parseRoute( $route )
+    {
+        //TODO regexp
+//        preg_match_all( '/(([\w\/\\:]*)+[^|:])/', $route['route'], $params, PREG_PATTERN_ORDER );
+        $params = explode( '|', $route['route'] );
         if ( !$params || count( $params ) < 2 ) {
             throw new \Exception( 'Route is not valid! Must be like this \'POST|/test/:route/|Class:method\'' );
         }
         $classAndMethod = [];
-        if ( isset( $params[0][2] ) ) {
-            $classAndMethod = explode( ':', $params[0][2] );
+        if ( isset( $params[2] ) ) {
+            $classAndMethod = explode( ':', $params[2] );
         }
         return [
-            'type' => $params[0][0],
-            'route' => $params[0][1],
-            'reg' => $this->getRegex( $params[0][1] ),
+            'type' => $params[0],
+            'route' => $params[1],
+            'reg' => $this->getRegex( $params[1] ),
             'class' => isset( $classAndMethod[0] ) ? $classAndMethod[0] : null,
             'method' => isset( $classAndMethod[1] ) ? $classAndMethod[1] : null,
             'func' => isset( $route['call'] ) ? $route['call'] : null,
@@ -48,7 +53,8 @@ class Router extends Factory {
         ];
     }
 
-    public function disableRouterType( $type ) {
+    public function disableRouterType( $type )
+    {
         $type = strtoupper( $type );
         if ( isset( $this->routeTypes[$type] ) ) {
             $this->routeTypes[$type] = false;
@@ -57,9 +63,15 @@ class Router extends Factory {
         return false;
     }
 
-    public function getCurrentRoutParams( $uri, $base, $method ) {
+    public function getCurrentRoutParams( $uri, $base, $method )
+    {
         if ( !isset( $this->routes[$method] ) ) return null;
-        $path = substr( $uri, strlen( $base ) );
+        if ( $base != '/' ) {
+            $path = substr( $uri, strlen( $base ) );
+        } else {
+            $path = $uri;
+        }
+
         foreach ( $this->routes[$method] as &$route ) {
             $ok = preg_match( $route['reg'], $path, $matches );
             if ( $ok ) {
@@ -86,7 +98,8 @@ class Router extends Factory {
      * @return bool|string
      * Thanks https://stackoverflow.com/questions/30130913/how-to-do-url-matching-regex-for-routing-framework/30359808#30359808
      */
-    private function getRegex( $pattern ) {
+    private function getRegex( $pattern )
+    {
         if ( preg_match( '/[^-:\/_{}()a-zA-Z\d]/', $pattern ) )
             return false; // Invalid pattern
 
@@ -114,7 +127,8 @@ class Router extends Factory {
         return $patternAsRegex;
     }
 
-    public function __construct() {
+    public function __construct()
+    {
 
     }
 }
