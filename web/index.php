@@ -21,9 +21,15 @@ $routes = [
         }
     ],
     [
-        'route' => 'GET|/',
+        'route' => 'GET|/|ASD\TestClass:qget',
         'call' => function () {
             echo 'main route';
+        }
+    ],
+    [
+        'route' => 'POST|/|ASD\TestClass:qpost',
+        'call' => function () {
+            echo 'main route POST';
         }
     ]
 ];

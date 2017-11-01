@@ -26,4 +26,14 @@ class TestClass extends Factory
     {
         echo 'asd';
     }
+
+    public function qpost()
+    {
+        echo 'main post route';
+    }
+
+    public function qget()
+    {
+        echo 'main get route';
+    }
 }

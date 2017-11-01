@@ -9,10 +9,11 @@
 namespace ZXC;
 
 
-class DB {
-    private $db /*= null*/;
-    private $dbType = null;
-    private $persistent = null;
+class DB extends Factory
+{
+    private $db;
+    private $dbType;
+    private $persistent;
 
     /**
      * DB constructor.
@@ -21,7 +22,8 @@ class DB {
      * @param $password
      * @param bool $persistent
      */
-    public function __construct( $dsn, $user, $password, $persistent = false ) {
+    public function __construct( $dsn, $user, $password, $persistent = false )
+    {
         $this->persistent = $persistent;
         try {
             $this->db = new \PDO( $dsn, $user, $password, [ \PDO::ATTR_PERSISTENT => $this->persistent ] );
@@ -35,21 +37,24 @@ class DB {
     /**
      * DB destruct
      */
-    public function __destruct() {
+    public function __destruct()
+    {
         if ( !$this->persistent ) $this->db = null;
     }
 
     /**
      * @return null|\PDO
      */
-    public function getDb() {
+    public function getDb()
+    {
         return $this->db;
     }
 
     /**
      * @return mixed|null
      */
-    public function getDbType() {
+    public function getDbType()
+    {
         return $this->dbType;
     }
 }
