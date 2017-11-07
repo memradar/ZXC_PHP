@@ -9,27 +9,31 @@
 namespace ZXC;
 
 
-class DB extends Factory
+class DB
 {
-    private $db;
-    private $dbType;
-    private $persistent;
+    private $db /*= null*/
+    ;
+    private $dbType = null;
+    private $persistent = null;
 
     /**
      * DB constructor.
-     * @param $dsn
-     * @param $user
-     * @param $password
+     *
+     * @param      $dsn
+     * @param      $user
+     * @param      $password
      * @param bool $persistent
      */
-    public function __construct( $dsn, $user, $password, $persistent = false )
+    public function __construct($dsn, $user, $password, $persistent = false)
     {
         $this->persistent = $persistent;
         try {
-            $this->db = new \PDO( $dsn, $user, $password, [ \PDO::ATTR_PERSISTENT => $this->persistent ] );
-            $this->dbType = $this->db->getAttribute( \PDO::ATTR_DRIVER_NAME );
-            $this->db->setAttribute( \PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION );
-        } catch ( \PDOException $e ) {
+            $this->db     = new \PDO($dsn, $user, $password,
+                [\PDO::ATTR_PERSISTENT => $this->persistent]);
+            $this->dbType = $this->db->getAttribute(\PDO::ATTR_DRIVER_NAME);
+            $this->db->setAttribute(\PDO::ATTR_ERRMODE,
+                \PDO::ERRMODE_EXCEPTION);
+        } catch (\PDOException $e) {
             echo $e;
         }
     }
@@ -39,7 +43,9 @@ class DB extends Factory
      */
     public function __destruct()
     {
-        if ( !$this->persistent ) $this->db = null;
+        if ( ! $this->persistent) {
+            $this->db = null;
+        }
     }
 
     /**
