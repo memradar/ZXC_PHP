@@ -35,7 +35,7 @@ class ZXC extends Factory
     private function fillMain()
     {
         $this->main['URI'] = &$_SERVER['REQUEST_URI'];
-        $this->main['HOST'] = $_SERVER['SERVER_NAME'];
+        $this->main['HOST'] = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : null;
         $this->main['METHOD'] = &$_SERVER['REQUEST_METHOD'];
         $this->main['BASE_ROUTE'] = dirname( $_SERVER['SCRIPT_NAME'] );
         $this->main['ROUTE'] = '';
