@@ -9,7 +9,8 @@
 namespace ZXC;
 
 
-class User {
+class User
+{
     private $city = null;
     private $fname = null;
     private $lname = null;
