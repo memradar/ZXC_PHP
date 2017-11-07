@@ -8,24 +8,25 @@ abstract class Factory
 
     protected static $instances = [];
 
-    public static function getInstance( $params = null )
+    public static function getInstance($params = null)
     {
         $className = static::getClassName();
-        if ( !isset( self::$instances[$className] ) ) {
-            if ( $params ) {
-                self::$instances[$className] = new $className( $params );
+        if ( ! isset(self::$instances[$className])) {
+            if ($params) {
+                self::$instances[$className] = new $className($params);
             } else {
                 self::$instances[$className] = new $className();
             }
         }
+
         return self::$instances[$className];
     }
 
     public static function removeInstance()
     {
         $className = static::getClassName();
-        if ( array_key_exists( $className, self::$instances ) ) {
-            unset( self::$instances[$className] );
+        if (array_key_exists($className, self::$instances)) {
+            unset(self::$instances[$className]);
         }
     }
 
@@ -34,14 +35,14 @@ abstract class Factory
         return get_called_class();
     }
 
-    public function set( $key, $value )
+    public function set($key, $value)
     {
         $this->$key = $value;
     }
 
-    public function get( $key )
+    public function get($key)
     {
-        if ( isset( $this->$key ) ) {
+        if (isset($this->$key)) {
             return $this->$key;
         } else {
             return null;

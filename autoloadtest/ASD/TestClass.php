@@ -11,7 +11,7 @@ class TestClass extends Factory
     use Helper;
     public static $test = ['statvar' => 1];
 
-    public static function qwe( $zxc, $params )
+    public static function qwe($zxc, $params)
     {
         $z = $zxc;
         $p = $params;

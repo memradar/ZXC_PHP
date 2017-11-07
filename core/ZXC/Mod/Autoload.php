@@ -1,6 +1,7 @@
 <?php
 
 namespace ZXC\Mod;
+
 require_once ZXC_ROOT . DIRECTORY_SEPARATOR . 'ZXC' . DIRECTORY_SEPARATOR
     . 'Factory.php';
 require_once ZXC_ROOT . DIRECTORY_SEPARATOR . 'ZXC' . DIRECTORY_SEPARATOR
@@ -20,9 +21,9 @@ class Autoload extends Factory
         return self::$autoloadDirectories;
     }
 
-    public function setAutoloadDirectories( array $dir )
+    public function setAutoloadDirectories(array $dir)
     {
-        if ( !$this->isAssoc( $dir ) ) {
+        if ( ! $this->isAssoc($dir)) {
             return null;
         }
         self::$autoloadDirectories = array_merge(
@@ -30,48 +31,54 @@ class Autoload extends Factory
         );
     }
 
-    public function disableAutoloadDirectories( $dir )
+    public function disableAutoloadDirectories($dir)
     {
-        if ( isset( self::$autoloadDirectories[$dir] ) ) {
+        if (isset(self::$autoloadDirectories[$dir])) {
             self::$autoloadDirectories[$dir] = false;
+
             return true;
         }
+
         return false;
     }
 
-    public function enableAutoloadDirectories( $dir )
+    public function enableAutoloadDirectories($dir)
     {
-        if ( isset( self::$autoloadDirectories[$dir] ) ) {
+        if (isset(self::$autoloadDirectories[$dir])) {
             self::$autoloadDirectories[$dir] = true;
+
             return true;
         }
+
         return false;
     }
 
-    public function removeAutoloadDirectories( $dir )
+    public function removeAutoloadDirectories($dir)
     {
-        if ( isset( self::$autoloadDirectories[$dir] ) ) {
-            unset( self::$autoloadDirectories[$dir] );
+        if (isset(self::$autoloadDirectories[$dir])) {
+            unset(self::$autoloadDirectories[$dir]);
+
             return true;
         }
+
         return false;
     }
 
-    public static function autoload( $className )
+    public static function autoload($className)
     {
-        $file = str_replace( '\\', DIRECTORY_SEPARATOR, $className );
-        if ( strpos( $className, 'ZXC' ) === 0 ) {
+        $file = str_replace('\\', DIRECTORY_SEPARATOR, $className);
+        if (strpos($className, 'ZXC') === 0) {
             $file = ZXC_ROOT . DIRECTORY_SEPARATOR . $file . '.php';
-            if ( !is_file( $file ) ) {
+            if ( ! is_file($file)) {
                 return false;
             }
         } else {
-            if ( !empty( self::$autoloadDirectories ) ) {
-                foreach ( self::$autoloadDirectories as $dir => $val ) {
-                    if ( $val ) {
+            if ( ! empty(self::$autoloadDirectories)) {
+                foreach (self::$autoloadDirectories as $dir => $val) {
+                    if ($val) {
                         $file = ZXC_ROOT . DIRECTORY_SEPARATOR . $dir
                             . DIRECTORY_SEPARATOR . $file . '.php';
-                        if ( is_file( $file ) ) {
+                        if (is_file($file)) {
                             break;
                         }
                     }
@@ -79,9 +86,11 @@ class Autoload extends Factory
             }
         }
         require $file;
+
         return false;
     }
 }
 
-spl_autoload_register( 'ZXC\Mod\Autoload::autoload' );
+spl_autoload_register('ZXC\Mod\Autoload::autoload');
+
 return Autoload::getInstance();

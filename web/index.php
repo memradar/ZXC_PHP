@@ -1,22 +1,22 @@
 <?php
-$zxc = require_once '../core/index.php';
+$zxc    = require_once '../core/index.php';
 $config = require_once '../conf/config.php';
-$zxc->set( 'AUTOLOAD', ['../autoloadtest' => true] );
+$zxc->set('AUTOLOAD', ['../autoloadtest' => true]);
 $routes = [
     [
         'route'  => 'GET|/:username|ASD\TestClass:qwe',
-        'call'   => function ( $zxc ) {
+        'call'   => function ($zxc) {
             $stop = $zxc;
         },
         'before' => 'ASD\TestClass:qwe',
-        'after'  => function ( $z, $p ) {
-            $zxc = $z;
+        'after'  => function ($z, $p) {
+            $zxc    = $z;
             $params = $p;
         }
     ],
     [
         'route' => 'POST|/:user/profile|ASD\TestClass:asd',
-        'call'  => function ( $zxc ) {
+        'call'  => function ($zxc) {
             $stop = $zxc;
         }
     ],
@@ -27,5 +27,5 @@ $routes = [
         }
     ]
 ];
-$zxc->registerRoutes( $routes );
+$zxc->registerRoutes($routes);
 $zxc->go();
