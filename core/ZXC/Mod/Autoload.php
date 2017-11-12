@@ -66,6 +66,7 @@ class Autoload extends Factory
 
     public static function autoload($className)
     {
+        $file = false;
         $fileClass = str_replace('\\', DIRECTORY_SEPARATOR, $className);
         if (strpos($className, 'ZXC') === 0) {
             $file = ZXC_ROOT . DIRECTORY_SEPARATOR . $fileClass . '.php';
@@ -86,7 +87,9 @@ class Autoload extends Factory
                 }
             }
         }
-        require $file;
+        if ($file) {
+            require $file;
+        }
 
         return false;
     }

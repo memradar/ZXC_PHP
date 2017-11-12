@@ -2,6 +2,8 @@
 
 namespace ZXC;
 
+use ZXC\Logger\Logger;
+
 class Router extends Factory
 {
     private $routes = [];
@@ -29,7 +31,7 @@ class Router extends Factory
         //TODO regexp
 //        preg_match_all( '/(([\w\/\\:]*)+[^|:])/', $route['route'], $params, PREG_PATTERN_ORDER );
         $params = explode('|', $route['route']);
-        if ( ! $params || count($params) < 2) {
+        if (!$params || count($params) < 2) {
             throw new \Exception(
                 'Route is not valid! Must be like this \'POST|/test/:route/|Class:method\''
             );
@@ -40,12 +42,12 @@ class Router extends Factory
         }
 
         return [
-            'type'   => $params[0],
-            'route'  => $params[1],
-            'reg'    => $this->getRegex($params[1]),
-            'class'  => isset($classAndMethod[0]) ? $classAndMethod[0] : null,
+            'type' => $params[0],
+            'route' => $params[1],
+            'reg' => $this->getRegex($params[1]),
+            'class' => isset($classAndMethod[0]) ? $classAndMethod[0] : null,
             'method' => isset($classAndMethod[1]) ? $classAndMethod[1] : null,
-            'func'   => isset($route['call']) ? $route['call'] : null,
+            'func' => isset($route['call']) ? $route['call'] : null,
             'params' => null
         ];
     }
@@ -64,7 +66,7 @@ class Router extends Factory
 
     public function getCurrentRoutParams($uri, $base, $method)
     {
-        if ( ! isset($this->routes[$method])) {
+        if (!isset($this->routes[$method])) {
             return null;
         }
         if ($base != '/') {
@@ -113,7 +115,7 @@ class Router extends Factory
 
         // Create capture group for ":parameter"
         $allowedParamChars = '[a-zA-Z0-9\_\-]+';
-        $pattern           = preg_replace(
+        $pattern = preg_replace(
             '/:(' . $allowedParamChars . ')/',   # Replace ":parameter"
             '(?<$1>' . $allowedParamChars . ')',
             # with "(?<parameter>[a-zA-Z0-9\_\-]+)"
@@ -136,6 +138,7 @@ class Router extends Factory
 
     public function __construct()
     {
-
+//        $loger = new Logger(['filePath' => '../conf/router.log', 'root' => true]);
+//        $loger->info('router ->>>>>>> test message', ['testContext' => 'qwerty']);
     }
 }

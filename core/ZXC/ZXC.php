@@ -23,7 +23,7 @@ class ZXC extends Factory
 
     public function registerRoutes($routes = [])
     {
-        if ( ! $this->router || ! $routes) {
+        if (!$this->router || !$routes) {
             return false;
         }
         $this->router->registerRoutes($routes);
@@ -33,15 +33,17 @@ class ZXC extends Factory
 
     private function fillMain()
     {
-        $this->main['URI']        = &$_SERVER['REQUEST_URI'];
-        $this->main['HOST']       = isset($_SERVER['SERVER_NAME'])
+        $this->main['AUTOLOAD'] = Autoload::getInstance();
+        $this->main['AUTOLOAD']->setAutoloadDirectories(['' => true]);
+        $this->main['URI'] = &$_SERVER['REQUEST_URI'];
+        $this->main['HOST'] = isset($_SERVER['SERVER_NAME'])
             ? $_SERVER['SERVER_NAME'] : null;
-        $this->main['METHOD']     = &$_SERVER['REQUEST_METHOD'];
+        $this->main['METHOD'] = &$_SERVER['REQUEST_METHOD'];
         $this->main['BASE_ROUTE'] = dirname($_SERVER['SCRIPT_NAME']);
-        $this->main['ROUTE']      = '';
-        $this->main['POST']       = &$_POST;
-        $this->main['GET']        = &$_GET;
-        $this->main['AUTOLOAD']   = Autoload::getInstance();
+        $this->main['ROUTE'] = '';
+        $this->main['POST'] = &$_POST;
+        $this->main['GET'] = &$_GET;
+        $this->main['LOGGER'] = new Logger\Logger();
     }
 
     public function set($key, $val)
@@ -60,12 +62,12 @@ class ZXC extends Factory
         $routeParams = $this->router->getCurrentRoutParams(
             $this->main['URI'], $this->main['BASE_ROUTE'], $this->main['METHOD']
         );
-        if ( ! $routeParams) {
+        if (!$routeParams) {
             return false;
         } //TODO 404
 
-        if ( ! $routeParams['class'] && ! $routeParams['func']
-            && ! is_callable(
+        if (!$routeParams['class'] && !$routeParams['func']
+            && !is_callable(
                 $routeParams['func']
             )
         ) {

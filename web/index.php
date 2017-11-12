@@ -2,7 +2,7 @@
 $zxc    = require_once '../core/index.php';
 $config = require_once '../conf/config.php';
 $zxc->set('AUTOLOAD', ['../autoloadtest' => true,'/' => true]);
-$logger = new \ZXC\Logger\Logger();
+//$logger = new \ZXC\Logger\Logger(['filePath'=>'../log.txt']);
 $stop = false;
 $routes = [
     [
