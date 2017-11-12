@@ -18,13 +18,27 @@ class Route
     private $method;
     private $func;
     private $params;
+    private $logger;
+    private $logLevel;
 
     public function __construct(array $params = [])
     {
+        $this->logger = new Logger\Logger(['filePath' => '../log/route.log', 'root' => true]);
+
+        $zxc = ZXC::getInstance();
+        $config = $zxc->get('CONFIG');
+        $this->logLevel = &$config['LOGGER']['applevel'];
+
+
         if (!$params) {
+            $this->logger->critical('Route is not valid! Must be like this \'POST|/test/:route/|Class:method\'',
+                $params);
             throw new \Exception(
                 'Route is not valid! Must be like this \'POST|/test/:route/|Class:method\''
             );
+        }
+        if ($this->logLevel === 'debug') {
+            $this->logger->debug('Route -> __construct', $params);
         }
         foreach ($params as $item => $val) {
             $this->$item = $val;

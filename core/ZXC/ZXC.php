@@ -33,6 +33,7 @@ class ZXC extends Factory
 
     private function fillMain()
     {
+        $this->main['CONFIG'] = [];
         $this->main['AUTOLOAD'] = Autoload::getInstance();
         $this->main['AUTOLOAD']->setAutoloadDirectories(['' => true]);
         $this->main['URI'] = &$_SERVER['REQUEST_URI'];
@@ -54,6 +55,20 @@ class ZXC extends Factory
             if (isset($this->main, $key)) {
                 $this->main[$key] = $val;
             }
+        }
+    }
+
+    public function get($key)
+    {
+        if (!$key) {
+            return null;
+        }
+        if (isset($this->$key)) {
+            return $this->$key;
+        } elseif (isset($this->main[$key])) {
+            return $this->main[$key];
+        } else {
+            return null;
         }
     }
 

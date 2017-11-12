@@ -8,10 +8,23 @@ return $config = [
         'LOCAL' => ''
     ],
     'AUTH' => [
-        'field' => [ 'login', 'password' ]
+        'field' => [
+            'login',
+            'password'
+        ]
     ],
-    'ZXC'=>[
-        'version'=> '0.0.1-a'
+    'ZXC' => [
+        'version' => '0.0.1-a'
     ],
-    'AUTOLOAD'=>'../AUTOL'
+    'AUTOLOAD' => [
+        '../autoloadtest' => true,
+        '' => true
+    ],
+    'LOGGER' => [
+        'applevel' => 'debug',
+        'settings' => [
+            'filePath' => '../log/log.log',
+            'root' => true
+        ]
+    ]
 ];
