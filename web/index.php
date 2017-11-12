@@ -1,7 +1,9 @@
 <?php
 $zxc    = require_once '../core/index.php';
 $config = require_once '../conf/config.php';
-$zxc->set('AUTOLOAD', ['../autoloadtest' => true]);
+$zxc->set('AUTOLOAD', ['../autoloadtest' => true,'/' => true]);
+$logger = new \ZXC\Logger\Logger();
+$stop = false;
 $routes = [
     [
         'route'  => 'GET|/:username|ASD\TestClass:qwe',

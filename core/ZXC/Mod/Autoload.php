@@ -23,7 +23,7 @@ class Autoload extends Factory
 
     public function setAutoloadDirectories(array $dir)
     {
-        if ( ! $this->isAssoc($dir)) {
+        if (!$this->isAssoc($dir)) {
             return null;
         }
         self::$autoloadDirectories = array_merge(
@@ -66,19 +66,20 @@ class Autoload extends Factory
 
     public static function autoload($className)
     {
-        $file = str_replace('\\', DIRECTORY_SEPARATOR, $className);
+        $fileClass = str_replace('\\', DIRECTORY_SEPARATOR, $className);
         if (strpos($className, 'ZXC') === 0) {
-            $file = ZXC_ROOT . DIRECTORY_SEPARATOR . $file . '.php';
-            if ( ! is_file($file)) {
+            $file = ZXC_ROOT . DIRECTORY_SEPARATOR . $fileClass . '.php';
+            if (!is_file($file)) {
                 return false;
             }
         } else {
-            if ( ! empty(self::$autoloadDirectories)) {
+            if (!empty(self::$autoloadDirectories)) {
                 foreach (self::$autoloadDirectories as $dir => $val) {
                     if ($val) {
                         $file = ZXC_ROOT . DIRECTORY_SEPARATOR . $dir
-                            . DIRECTORY_SEPARATOR . $file . '.php';
-                        if (is_file($file)) {
+                            . DIRECTORY_SEPARATOR . $fileClass . '.php';
+                        $file = realpath($file);
+                        if ($file && is_file($file)) {
                             break;
                         }
                     }
