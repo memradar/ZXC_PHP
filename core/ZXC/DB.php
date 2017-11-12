@@ -11,8 +11,7 @@ namespace ZXC;
 
 class DB
 {
-    private $db /*= null*/
-    ;
+    private $db;
     private $dbType = null;
     private $persistent = null;
 
@@ -28,7 +27,7 @@ class DB
     {
         $this->persistent = $persistent;
         try {
-            $this->db     = new \PDO($dsn, $user, $password,
+            $this->db = new \PDO($dsn, $user, $password,
                 [\PDO::ATTR_PERSISTENT => $this->persistent]);
             $this->dbType = $this->db->getAttribute(\PDO::ATTR_DRIVER_NAME);
             $this->db->setAttribute(\PDO::ATTR_ERRMODE,
@@ -43,7 +42,7 @@ class DB
      */
     public function __destruct()
     {
-        if ( ! $this->persistent) {
+        if (!$this->persistent) {
             $this->db = null;
         }
     }
