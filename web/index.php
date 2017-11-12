@@ -1,30 +1,29 @@
 <?php
-$zxc    = require_once '../core/index.php';
+$zxc = require_once '../core/index.php';
 $config = require_once '../conf/config.php';
-$zxc->set('AUTOLOAD', ['../autoloadtest' => true,'/' => true]);
-//$logger = new \ZXC\Logger\Logger(['filePath'=>'../log.txt']);
-$stop = false;
+$zxc->set('CONFIG', $config);
+$zxc->set('AUTOLOAD', ['../autoloadtest' => true, '/' => true]);
 $routes = [
     [
-        'route'  => 'GET|/:username|ASD\TestClass:qwe',
-        'call'   => function ($zxc) {
+        'route' => 'GET|/:username|ASD\TestClass:qwe',
+        'call' => function ($zxc) {
             $stop = $zxc;
         },
         'before' => 'ASD\TestClass:qwe',
-        'after'  => function ($z, $p) {
-            $zxc    = $z;
+        'after' => function ($z, $p) {
+            $zxc = $z;
             $params = $p;
         }
     ],
     [
         'route' => 'POST|/:user/profile|ASD\TestClass:asd',
-        'call'  => function ($zxc) {
+        'call' => function ($zxc) {
             $stop = $zxc;
         }
     ],
     [
         'route' => 'GET|/',
-        'call'  => function () {
+        'call' => function () {
             echo 'main route';
         }
     ]
