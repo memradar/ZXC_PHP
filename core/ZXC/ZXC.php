@@ -66,40 +66,8 @@ class ZXC extends Factory
             return false;
         } //TODO 404
 
-        if (!$routeParams['class'] && !$routeParams['func']
-            && !is_callable(
-                $routeParams['func']
-            )
-        ) {
-            return false; //TODO 404
-        }
         ob_start();
-        if ($routeParams['class']) {
-            if (is_subclass_of($routeParams['class'], 'ZXC\Factory', true)) {
-                $userClass = call_user_func(
-                    $routeParams['class'] . '::getInstance'
-                );
-                call_user_func_array(
-                    [$userClass, $routeParams['method']],
-                    [$this, $routeParams['params']]
-                );
-            } else {
-                if (class_exists($routeParams['class'])) {
-                    $userClass = new $routeParams['class'];
-                    if (method_exists($userClass, $routeParams['method'])) {
-                        call_user_func_array(
-                            [$userClass, $routeParams['method']],
-                            [$this, $routeParams['params']]
-                        );
-                    }
-                }
-            }
-        } else {
-            call_user_func_array(
-                $routeParams['func'], [$this, $routeParams['params']]
-            );
-        }
-
+        $routeParams->executeRoute($this);
         $body = ob_get_clean();
         echo $body;
 

@@ -15,11 +15,9 @@ class Router extends Factory
             foreach ($routes as $route) {
                 if (isset($route['route'])) {
                     $parsedRoute = $this->parseRoute($route);
-                    if (isset($this->routeTypes[$parsedRoute['type']])
-                        && $this->routeTypes[$parsedRoute['type']] === true
-                    ) {
-                        $this->routes[$parsedRoute['type']][$parsedRoute['route']]
-                            = $parsedRoute;
+                    $parsedRouteType = $parsedRoute->getType();
+                    if (isset($this->routeTypes[$parsedRouteType]) && $this->routeTypes[$parsedRouteType] === true) {
+                        $this->routes[$parsedRouteType][$parsedRoute->getRoute()] = $parsedRoute;
                     }
                 }
             }
@@ -29,7 +27,6 @@ class Router extends Factory
     private function parseRoute($route)
     {
         //TODO regexp
-//        preg_match_all( '/(([\w\/\\:]*)+[^|:])/', $route['route'], $params, PREG_PATTERN_ORDER );
         $params = explode('|', $route['route']);
         if (!$params || count($params) < 2) {
             throw new \Exception(
@@ -40,8 +37,7 @@ class Router extends Factory
         if (isset($params[2])) {
             $classAndMethod = explode(':', $params[2]);
         }
-
-        return [
+        $params = [
             'type' => $params[0],
             'route' => $params[1],
             'reg' => $this->getRegex($params[1]),
@@ -50,6 +46,7 @@ class Router extends Factory
             'func' => isset($route['call']) ? $route['call'] : null,
             'params' => null
         ];
+        return new Route($params);
     }
 
     public function disableRouterType($type)
@@ -75,8 +72,8 @@ class Router extends Factory
             $path = $uri;
         }
 
-        foreach ($this->routes[$method] as &$route) {
-            $ok = preg_match($route['reg'], $path, $matches);
+        foreach ($this->routes[$method] as $route) {
+            $ok = preg_match($route->getReg(), $path, $matches);
             if ($ok) {
                 $params = array_intersect_key(
                     $matches,
@@ -88,7 +85,7 @@ class Router extends Factory
                     )
                 );
                 if ($params) {
-                    $route['params'] = $params;
+                    $route->setParams($params);
                 }
 
                 return $route;
