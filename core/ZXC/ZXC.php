@@ -5,81 +5,78 @@ namespace ZXC;
 require_once 'Mod/Autoload.php';
 
 use ZXC\Mod\Autoload;
+use ZXC\Mod\HTTP;
+use ZXC\Mod\Logger;
 use ZXC\Traits\Helper;
 
 
 class ZXC extends Factory
 {
+    private $logger;
     private $router;
-    private $main = [];
+    private $autoload;
+    private $web = [];
+    private $http;
+    private $version = '0.0.1-a';
 
     use Helper;
 
     protected function __construct()
     {
         $this->fillMain();
-        $this->router = Router::getInstance('fds');
     }
 
-    public function registerRoutes($routes = [])
+    public function initialize(array $config)
     {
-        if (!$this->router || !$routes) {
-            return false;
-        }
-        $this->router->registerRoutes($routes);
-
-        return true;
+        // TODO: Implement initialize() method.
     }
 
     private function fillMain()
     {
-        $this->main['CONFIG'] = [];
-        $this->main['AUTOLOAD'] = Autoload::getInstance();
-        $this->main['AUTOLOAD']->setAutoloadDirectories(['' => true]);
-        $this->main['URI'] = &$_SERVER['REQUEST_URI'];
-        $this->main['HOST'] = isset($_SERVER['SERVER_NAME'])
+        $this->web['URI'] = &$_SERVER['REQUEST_URI'];
+        $this->web['HOST'] = isset($_SERVER['SERVER_NAME'])
             ? $_SERVER['SERVER_NAME'] : null;
-        $this->main['METHOD'] = &$_SERVER['REQUEST_METHOD'];
-        $this->main['BASE_ROUTE'] = dirname($_SERVER['SCRIPT_NAME']);
-        $this->main['ROUTE'] = '';
-        $this->main['POST'] = &$_POST;
-        $this->main['GET'] = &$_GET;
-        $this->main['LOGGER'] = new Logger\Logger();
+        $this->web['METHOD'] = &$_SERVER['REQUEST_METHOD'];
+        $this->web['BASE_ROUTE'] = dirname($_SERVER['SCRIPT_NAME']);
+        $this->web['POST'] = &$_POST;
+        $this->web['GET'] = &$_GET;
+        $this->autoload = Autoload::getInstance();
+        $this->autoload->setAutoloadDirectories(['' => true]);
+
+
+//        $this->http = HTTP::getInstance();
+//        $this->router = Router::getInstance();
+//        $this->logger = new Logger();
+
+
     }
 
-    public function set($key, $val)
+    public function setConfig(array $config = [])
     {
-        if ($key === 'AUTOLOAD') {
-            $this->main['AUTOLOAD']->setAutoloadDirectories($val);
-        } else {
-            if (isset($this->main, $key)) {
-                $this->main[$key] = $val;
+        if (!$config) {
+            return false;
+        }
+        Config::getInstance($config, $this);
+        foreach ($config as $k => $v) {
+            $className = strtolower($k);
+            if (class_exists($className)) {
+                if (method_exists($this->$className, 'initialize')) {
+                    $this->$className->initialize($v);
+                }
             }
         }
-    }
-
-    public function get($key)
-    {
-        if (!$key) {
-            return null;
-        }
-        if (isset($this->$key)) {
-            return $this->$key;
-        } elseif (isset($this->main[$key])) {
-            return $this->main[$key];
-        } else {
-            return null;
-        }
+        return true;
     }
 
     public function go()
     {
         $routeParams = $this->router->getCurrentRoutParams(
-            $this->main['URI'], $this->main['BASE_ROUTE'], $this->main['METHOD']
+            $this->web['URI'], $this->web['BASE_ROUTE'], $this->web['METHOD']
         );
         if (!$routeParams) {
+            $this->http->sendHeader(404);
             return false;
-        } //TODO 404
+        }
 
         ob_start();
         $routeParams->executeRoute($this);
@@ -87,5 +84,21 @@ class ZXC extends Factory
         echo $body;
 
         return true;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLogger()
+    {
+        return $this->logger;
+    }
+
+    public function sysLog($msg = '', $param = [])
+    {
+        if ($this->logger->getLevel() !== 'debug') {
+            return false;
+        }
+        $this->logger->debug($msg, $param);
     }
 }

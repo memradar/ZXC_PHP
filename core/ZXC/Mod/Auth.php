@@ -9,9 +9,7 @@
 namespace ZXC\Mod;
 
 
-use ZXC\Factory;
-
-class Auth extends Factory
+class Auth
 {
     public $test = true;
 }

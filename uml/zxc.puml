@@ -1,0 +1,63 @@
+@startuml
+
+abstract class Factory{
+
+    #{static} $instances = [];
+
+    + {static} getInstance();
+    + {static} removeInstance();
+    + set($key, $value);
+    + get($key);
+    # final static getClassName();
+    # __construct()
+    # final __clone()
+    # final __sleep()
+    # final __wakeup()
+}
+class Router extends Factory{
+    - $routes = [];
+    - $routeTypes = ['POST' => true, 'GET' => true];
+
+    + __construct();
+    + registerRoutes($routes = []);
+    + disableRouterType($type);
+    + getCurrentRoutParams($uri, $base, $method);
+    - getRegex($pattern);
+    - parseRoute($route);
+}
+
+class Route <<(C,#EEEEEE) ZXC>>{
+    - $type;
+    - $route;
+    - $reg;
+    - $class;
+    - $method;
+    - $func;
+    - $params;
+    - $logger;
+    - $logLevel;
+
+    + __construct(array $params = []);
+    + getType();
+    + getRoute();
+    + getReg();
+    + getClass();
+    + getMethod();
+    + getFunc();
+    + getParams();
+    + setParams($params);
+    + executeRoute($zxc);
+}
+
+class DB <<(C,#EEEEEE) ZXC>>  {
+    - $db;
+    - $dbType = null;
+    - $persistent = null;
+    + __construct($dsn, $user, $password, $persistent = false)
+    + __destruct()
+    + getDb()
+    + getDbType()
+}
+
+Router "+ 1..1" o-- "+1..*" Route: aggregation
+@enduml

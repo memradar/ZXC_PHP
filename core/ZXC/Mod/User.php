@@ -9,8 +9,10 @@
 namespace ZXC\Mod;
 
 
-abstract class User
+abstract class User extends Auth
 {
+    private $email;
+
     abstract public function load();
 
     abstract public function save();

@@ -1,0 +1,13 @@
+@startuml
+
+class DB{
+-$db
+}
+class Auth{
+-$fields[]
+}
+abstract User
+
+class Auth extends DB
+class User extends Auth
+@enduml

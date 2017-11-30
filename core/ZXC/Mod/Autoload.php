@@ -15,6 +15,10 @@ class Autoload extends Factory
     use Helper;
     private static $autoloadDirectories = [];
 
+    public function initialize(array $config)
+    {
+        $this->setAutoloadDirectories($config);
+    }
 
     public static function getAutoloadDirectories()
     {
@@ -88,7 +92,7 @@ class Autoload extends Factory
             }
         }
         if ($file) {
-            require $file;
+            require_once $file;
         }
 
         return false;

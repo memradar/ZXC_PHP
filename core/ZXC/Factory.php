@@ -8,12 +8,20 @@ abstract class Factory
 
     protected static $instances = [];
 
-    public static function getInstance($params = null)
+//    abstract public function initialize(array $config);
+
+    public static function getInstance()
     {
+        $params = func_get_args();
         $className = static::getClassName();
-        if ( ! isset(self::$instances[$className])) {
+        if (!isset(self::$instances[$className])) {
             if ($params) {
-                self::$instances[$className] = new $className($params);
+                if (version_compare(PHP_VERSION, '5.6.0', '>=')) {
+                    self::$instances[$className] = new $className(...$params);
+                } else {
+                    $reflect = new \ReflectionClass($className);
+                    self::$instances[$className] = $reflect->newInstanceArgs($params);
+                }
             } else {
                 self::$instances[$className] = new $className();
             }

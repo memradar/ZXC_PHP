@@ -5,6 +5,7 @@ namespace ZXC\Traits;
 
 trait Helper
 {
+    //TODO regex for check login email.and password
     public function isAssoc($arr)
     {
         if (array() === $arr) {

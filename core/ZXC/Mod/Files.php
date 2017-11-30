@@ -3,10 +3,9 @@
 namespace ZXC\Mod;
 
 
-use ZXC\Factory;
 use ZXC\Traits\Helper;
 
-class Files extends Factory
+class Files
 {
     use Helper;
     private $file;
