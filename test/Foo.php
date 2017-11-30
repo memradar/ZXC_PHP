@@ -6,7 +6,6 @@ class Foo
 {
 
 
-
     use Singleton;
 
     private $bar = 0;
