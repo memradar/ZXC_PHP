@@ -9,6 +9,8 @@
 namespace ZXC\Mod;
 
 
+use ZXC\ZXC;
+
 class Route
 {
     private $type;

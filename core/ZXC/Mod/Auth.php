@@ -9,7 +9,12 @@
 namespace ZXC\Mod;
 
 
-class Auth
+use ZXC\Interfaces\Module;
+
+class Auth implements Module
 {
-    public $test = true;
+    public function __construct(array $config = [])
+    {
+
+    }
 }

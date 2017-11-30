@@ -10,9 +10,12 @@ class Router extends Factory
     private $routes = [];
     private $routeTypes = ['POST' => true, 'GET' => true];
 
-    public function initialize(array $config)
+    public function reinitialize()
     {
-        $this->registerRoutes($config);
+        $params = func_get_args();
+        foreach ($params as $item) {
+            $this->registerRoutes($item);
+        }
     }
 
     public function registerRoutes(array $routes = [])

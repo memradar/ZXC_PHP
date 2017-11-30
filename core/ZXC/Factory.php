@@ -8,7 +8,7 @@ abstract class Factory
 
     protected static $instances = [];
 
-//    abstract public function initialize(array $config);
+    abstract function reinitialize();
 
     public static function getInstance()
     {
@@ -25,6 +25,9 @@ abstract class Factory
             } else {
                 self::$instances[$className] = new $className();
             }
+        }
+        if ($params) {
+            call_user_func_array([self::$instances[$className], 'reinitialize'], $params);
         }
 
         return self::$instances[$className];

@@ -8,8 +8,9 @@
 
 namespace ZXC\Mod;
 
+use ZXC\Interfaces\Module;
 
-class DB
+class DB implements Module
 {
     private $db;
     private $dbType = null;
@@ -18,16 +19,23 @@ class DB
     /**
      * DB constructor.
      *
-     * @param      $dsn
-     * @param      $user
-     * @param      $password
-     * @param bool $persistent
+     * @param array $params
+     * @throws \Exception
      */
-    public function __construct($dsn, $user, $password, $persistent = false)
+    public function __construct(array $params = []/*, $dsn, $user, $password, $persistent = false*/)
     {
-        $this->persistent = $persistent;
+        if (!isset($params['db']) || !isset($params['dns']) ||
+            !isset($params['host']) || !isset($params['port']) ||
+            !isset($params['name']) || !isset($params['pass'])
+        ) {
+            throw new \Exception('Error in construct parameters');
+        }
+        if (!isset($params['persistent'])) {
+            $params['persistent'] = false;
+        }
+        $this->persistent = $params['persistent'];
         try {
-            $this->db = new \PDO($dsn, $user, $password,
+            $this->db = new \PDO($params['dns'], $params['name'], $params['pass'],
                 [\PDO::ATTR_PERSISTENT => $this->persistent]);
             $this->dbType = $this->db->getAttribute(\PDO::ATTR_DRIVER_NAME);
             $this->db->setAttribute(\PDO::ATTR_ERRMODE,

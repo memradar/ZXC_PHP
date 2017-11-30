@@ -4,9 +4,10 @@ namespace ZXC;
 
 require_once 'Mod/Autoload.php';
 
-use ZXC\Mod\Autoload;
 use ZXC\Mod\HTTP;
 use ZXC\Mod\Logger;
+use ZXC\Mod\Autoload;
+use ZXC\Traits\Config;
 use ZXC\Traits\Helper;
 
 
@@ -20,13 +21,14 @@ class ZXC extends Factory
     private $version = '0.0.1-a';
 
     use Helper;
+    use Config;
 
     protected function __construct()
     {
         $this->fillMain();
     }
 
-    public function initialize(array $config)
+    public function reinitialize()
     {
         // TODO: Implement initialize() method.
     }
@@ -40,8 +42,8 @@ class ZXC extends Factory
         $this->web['BASE_ROUTE'] = dirname($_SERVER['SCRIPT_NAME']);
         $this->web['POST'] = &$_POST;
         $this->web['GET'] = &$_GET;
-        $this->autoload = Autoload::getInstance();
-        $this->autoload->setAutoloadDirectories(['' => true]);
+//        $this->autoload = Autoload::getInstance();
+//        $this->autoload->setAutoloadDirectories();
 
 
 //        $this->http = HTTP::getInstance();
@@ -51,22 +53,22 @@ class ZXC extends Factory
 
     }
 
-    public function setConfig(array $config = [])
-    {
-        if (!$config) {
-            return false;
-        }
-        Config::getInstance($config, $this);
-        foreach ($config as $k => $v) {
-            $className = strtolower($k);
-            if (class_exists($className)) {
-                if (method_exists($this->$className, 'initialize')) {
-                    $this->$className->initialize($v);
-                }
-            }
-        }
-        return true;
-    }
+//    public function setConfig(array $config = [])
+//    {
+//        if (!$config) {
+//            return false;
+//        }
+//        Config::getInstance($config, $this);
+//        foreach ($config as $k => $v) {
+//            $className = strtolower($k);
+//            if (class_exists($className)) {
+//                if (method_exists($this->$className, 'initialize')) {
+//                    $this->$className->initialize($v);
+//                }
+//            }
+//        }
+//        return true;
+//    }
 
     public function go()
     {

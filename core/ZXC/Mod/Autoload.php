@@ -15,9 +15,20 @@ class Autoload extends Factory
     use Helper;
     private static $autoloadDirectories = [];
 
-    public function initialize(array $config)
+    protected function __construct()
     {
-        $this->setAutoloadDirectories($config);
+        $params = func_get_args();
+        foreach ($params as $item) {
+            $this->setAutoloadDirectories($item);
+        }
+    }
+
+    function reinitialize(array $config = [])
+    {
+        $params = func_get_args();
+        foreach ($params as $item) {
+            $this->setAutoloadDirectories($item);
+        }
     }
 
     public static function getAutoloadDirectories()
@@ -101,4 +112,4 @@ class Autoload extends Factory
 
 spl_autoload_register('ZXC\Mod\Autoload::autoload');
 
-return Autoload::getInstance();
+return Autoload::getInstance(['' => true]);
