@@ -4,6 +4,9 @@ require_once 'Singleton.php';
 
 class Foo
 {
+
+
+
     use Singleton;
 
     private $bar = 0;
