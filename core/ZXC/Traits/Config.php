@@ -26,6 +26,11 @@ trait Config
                 }
             }
         }
+        foreach ($this->configModule as $module) {
+            if (method_exists($module, 'initialize')) {
+                $module->initialize();
+            }
+        }
         return true;
     }
 

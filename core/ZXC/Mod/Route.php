@@ -20,8 +20,9 @@ class Route
     private $method;
     private $func;
     private $params;
-    private $logger;
-    private $logLevel;
+    private $before;
+    private $after;
+    private $hooksResultTransfer;
 
     public function __construct(array $params = [])
     {
@@ -103,14 +104,84 @@ class Route
         $this->params = $params;
     }
 
+    private function callBefore(ZXC $zxc)
+    {
+        $resultBefore = null;
+        if ($this->before) {
+            if (is_array($this->before)) {
+                if (class_exists($this->before['class'])) {
+                    $userClassBefore = new $this->before['class'];
+                    if ($this->hooksResultTransfer) {
+                        $resultBefore = call_user_func_array(
+                            [$userClassBefore, $this->before['method']],
+                            [$zxc, $this->params]
+                        );
+                    } else {
+                        call_user_func_array(
+                            [$userClassBefore, $this->before['method']],
+                            [$zxc, $this->params]
+                        );
+                    }
+                }
+            } else {
+                if ($this->hooksResultTransfer) {
+                    $resultBefore = call_user_func_array(
+                        $this->before, [$zxc, $this->params]
+                    );
+                } else {
+                    call_user_func_array(
+                        $this->before, [$zxc, $this->params]
+                    );
+                }
+            }
+        }
+        return $resultBefore;
+    }
+
+    private function callAfter(ZXC $zxc, $result = null)
+    {
+        if ($this->after) {
+            if (is_array($this->after)) {
+                if (class_exists($this->after['class'])) {
+                    $userClassBefore = new $this->after['class'];
+                    if ($result) {
+                        call_user_func_array(
+                            [$userClassBefore, $this->after['method']],
+                            [$zxc, $this->params, $result]
+                        );
+                    } else {
+                        call_user_func_array(
+                            [$userClassBefore, $this->after['method']],
+                            [$zxc, $this->params]
+                        );
+                    }
+                }
+            } else {
+                if ($result) {
+                    call_user_func_array(
+                        $this->after, [$zxc, $this->params, $result, $result]
+                    );
+                } else {
+                    call_user_func_array(
+                        $this->after, [$zxc, $this->params]
+                    );
+                }
+            }
+        }
+        return true;
+    }
+
     public function executeRoute($zxc)
     {
+        $resultMainFunc = null;
+        $resultBefore = null;
+        $resultAfter = null;
+
         if ($this->class) {
             if (!class_exists($this->class)) {
                 $zxc = ZXC::getInstance();
                 $zxc->sysLog($this->class . ' is not defined. Can not execute route with params',
                     $this->params ? $this->params : []);
-//                throw new \Exception($this->class . ' is not defined');
             }
             if (is_subclass_of($this->class, 'ZXC\Factory', true)) {
                 $userClass = call_user_func(
@@ -123,11 +194,26 @@ class Route
             } else {
                 if (class_exists($this->class)) {
                     $userClass = new $this->class;
+                    if (is_subclass_of($this->class, 'ZXC\Interfaces\Module', true)) {
+                        if (method_exists($userClass, 'initialize')) {
+                            $userClass->initialize();
+                        }
+                    }
+                    $resultBefore = $this->callBefore($zxc);
                     if (method_exists($userClass, $this->method)) {
-                        call_user_func_array(
-                            [$userClass, $this->method],
-                            [$zxc, $this->params]
-                        );
+                        if ($this->hooksResultTransfer) {
+                            $resultMainFunc = call_user_func_array(
+                                [$userClass, $this->method],
+                                [$zxc, $this->params, $resultBefore]
+                            );
+                            $this->callAfter($zxc, $resultMainFunc);
+                        } else {
+                            call_user_func_array(
+                                [$userClass, $this->method],
+                                [$zxc, $this->params]
+                            );
+                            $this->callAfter($zxc);
+                        }
                     }
                 }
             }

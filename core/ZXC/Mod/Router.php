@@ -33,26 +33,62 @@ class Router extends Factory
         }
     }
 
+    public function parseHooks($params = '')
+    {
+        if (!$params) {
+            return false;
+        }
+        $classAndMethod = explode(':', $params);
+        if (!$classAndMethod || count($classAndMethod) > 2) {
+            return false;
+        }
+        return [
+            'class' => $classAndMethod[0],
+            'method' => $classAndMethod[1]
+        ];
+    }
+
     private function parseRoute($route)
     {
         //TODO regexp
         $params = explode('|', $route['route']);
         if (!$params || count($params) < 2) {
-            throw new \Exception(
-                'Route is not valid! Must be like this \'POST|/test/:route/|Class:method\''
-            );
+            return false;
+//            throw new \Exception(
+//                'Route is not valid! Must be like this \'POST|/test/:route/|Class:method\''
+//            );
         }
         $classAndMethod = [];
         if (isset($params[2])) {
             $classAndMethod = explode(':', $params[2]);
         }
+        $before = null;
+        $after = null;
+        if (isset($route['before'])) {
+            if (is_callable($route['before'])) {
+                $before = $route['before'];
+            } else {
+                $before = $this->parseHooks($route['before']);
+            }
+        }
+        if (isset($route['after'])) {
+            if (is_callable($route['after'])) {
+                $after = $route['after'];
+            } else {
+                $after = $this->parseHooks($route['after']);
+            }
+        }
+
         $params = [
             'type' => $params[0],
             'route' => $params[1],
             'reg' => $this->getRegex($params[1]),
             'class' => isset($classAndMethod[0]) ? $classAndMethod[0] : null,
             'method' => isset($classAndMethod[1]) ? $classAndMethod[1] : null,
-            'func' => isset($route['call']) ? $route['call'] : null
+            'func' => isset($route['call']) ? $route['call'] : null,
+            'before' => $before,
+            'after' => $after,
+            'hooksResultTransfer' => isset($route['hooksResultTransfer']) ? $route['hooksResultTransfer'] : null
         ];
         return new Route($params);
     }

@@ -16,7 +16,7 @@ class HTTP
         500 => 'Internal Server Error'
     ];
 
-    public function initialize(array $config)
+    public function initialize(array $config = [])
     {
         // TODO: Implement initialize() method.
     }

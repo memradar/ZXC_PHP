@@ -17,4 +17,9 @@ class Auth implements Module
     {
 
     }
+
+    public function initialize()
+    {
+        // TODO: Implement initialize() method.
+    }
 }

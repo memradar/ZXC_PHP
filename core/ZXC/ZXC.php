@@ -48,7 +48,6 @@ class ZXC extends Factory
     {
         $router = $this->getModule('Router');
         $http = $this->getModule('HTTP');
-        
         $routeParams = $router->getCurrentRoutParams(
             $this->web['URI'], $this->web['BASE_ROUTE'], $this->web['METHOD']
         );
