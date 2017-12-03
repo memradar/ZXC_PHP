@@ -16,7 +16,7 @@ class Logger extends AbstractLogger implements LoggerInterface
 
     public function __construct(array $attributes = [])
     {
-        $this->initialize($attributes = []);
+        $this->initialize($attributes);
     }
 
     public function initialize(array $attributes = [])

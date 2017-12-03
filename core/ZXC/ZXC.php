@@ -15,7 +15,6 @@ class ZXC extends Factory
 {
     private $logger;
     private $router;
-    private $autoload;
     private $web = [];
     private $http;
     private $version = '0.0.1-a';
@@ -42,41 +41,19 @@ class ZXC extends Factory
         $this->web['BASE_ROUTE'] = dirname($_SERVER['SCRIPT_NAME']);
         $this->web['POST'] = &$_POST;
         $this->web['GET'] = &$_GET;
-//        $this->autoload = Autoload::getInstance();
-//        $this->autoload->setAutoloadDirectories();
-
-
-//        $this->http = HTTP::getInstance();
-//        $this->router = Router::getInstance();
-//        $this->logger = new Logger();
-
-
     }
 
-//    public function setConfig(array $config = [])
-//    {
-//        if (!$config) {
-//            return false;
-//        }
-//        Config::getInstance($config, $this);
-//        foreach ($config as $k => $v) {
-//            $className = strtolower($k);
-//            if (class_exists($className)) {
-//                if (method_exists($this->$className, 'initialize')) {
-//                    $this->$className->initialize($v);
-//                }
-//            }
-//        }
-//        return true;
-//    }
 
     public function go()
     {
-        $routeParams = $this->router->getCurrentRoutParams(
+        $router = $this->getModule('Router');
+        $http = $this->getModule('HTTP');
+        
+        $routeParams = $router->getCurrentRoutParams(
             $this->web['URI'], $this->web['BASE_ROUTE'], $this->web['METHOD']
         );
         if (!$routeParams) {
-            $this->http->sendHeader(404);
+            $http->sendHeader(404);
             return false;
         }
 
@@ -88,19 +65,16 @@ class ZXC extends Factory
         return true;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getLogger()
-    {
-        return $this->logger;
-    }
-
     public function sysLog($msg = '', $param = [])
     {
-        if ($this->logger->getLevel() !== 'debug') {
+        $logger = $this->getModule('Logger');
+        if (!$logger) {
             return false;
         }
-        $this->logger->debug($msg, $param);
+        if ($logger->getLevel() !== 'debug') {
+            return false;
+        }
+        $logger->debug($msg, $param);
+        return true;
     }
 }

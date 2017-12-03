@@ -8,10 +8,7 @@
 
 namespace ZXC\Mod;
 
-
-use ZXC\Factory;
-
-class HTTP extends Factory
+class HTTP
 {
     public $headers = [
         200 => 'OK',

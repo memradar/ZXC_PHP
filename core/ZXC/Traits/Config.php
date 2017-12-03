@@ -20,7 +20,7 @@ trait Config
 
         foreach ($config as $nameSpaces => $modules) {
             foreach ($modules as $moduleName => $moduleParams) {
-                $class = $this->getModuleClass($nameSpaces, $moduleName, $moduleParams);
+                $class = $this->getModuleClassName($nameSpaces, $moduleName, $moduleParams);
                 if ($class) {
                     $this->configModule[$moduleName] = $class;
                 }
@@ -29,7 +29,7 @@ trait Config
         return true;
     }
 
-    private function getModuleClass($nameSpaces, $moduleName, $params)
+    private function getModuleClassName($nameSpaces, $moduleName, $params)
     {
         $className = $nameSpaces . '\\' . $moduleName;
         if (class_exists($className)) {
@@ -40,5 +40,13 @@ trait Config
             }
         }
         return false;
+    }
+
+    public function getModule($moduleName)
+    {
+        if (!$moduleName || !isset($this->configModule[$moduleName])) {
+            return false;
+        }
+        return $this->configModule[$moduleName];
     }
 }
