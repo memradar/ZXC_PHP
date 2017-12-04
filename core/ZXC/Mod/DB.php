@@ -99,15 +99,39 @@ class DB implements Module
 
     public function exec($query, array $params = [], $fetchStyle = \PDO::FETCH_ASSOC)
     {
+        $isArray = is_array($query);
+        if ($isArray && count($query) !== count($params)) {
+            return false;
+        }
+        $resultArr = [];
         try {
-            $this->begin();
-            $state = $this->db->prepare($query);
-            $result = $state->execute($params);
-            $this->commit();
-            if ($result) {
-                $result = $state->fetchAll($fetchStyle);
+            if ($isArray) {
+                $this->begin();
+                foreach ($query as $item => $value) {
+                    foreach ($value as $fieldName => $queryValue) {
+                        $state = $this->db->prepare($queryValue);
+                        $result = $state->execute($value['params']);
+                        if ($result) {
+                            if (!isset($resultArr[$fieldName])) {
+                                $resultArr[$fieldName] = $state->fetchAll($fetchStyle);
+                            } else {
+                                $resultArr[] = $state->fetchAll($fetchStyle);
+                            }
+                        }
+                        break;
+                    }
+                }
+                $this->commit();
+            } else {
+                $this->begin();
+                $state = $this->db->prepare($query);
+                $result = $state->execute($params);
+                $this->commit();
+                if ($result) {
+                    $resultArr[] = $state->fetchAll($fetchStyle);
+                }
             }
-            return $result;
+            return $resultArr;
         } catch (\Exception $e) {
             $this->rollBack();
         }
