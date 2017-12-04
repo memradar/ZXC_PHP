@@ -11,14 +11,23 @@ namespace ZXC\Mod;
 use ZXC\ZXC;
 use ZXC\Interfaces\Module;
 
+/**
+ * Class DB
+ * @package ZXC\Mod
+ * @property db PDO
+ */
 class DB implements Module
 {
+    /**
+     * @var $db \PDO
+     */
     private $db;
     private $dns;
     private $name;
     private $pass;
-    private $dbType = null;
-    private $persistent = null;
+    private $dbType;
+    private $persistent;
+    private $transaction;
 
     /**
      * DB constructor.
@@ -88,8 +97,44 @@ class DB implements Module
         return $this->dbType;
     }
 
-    public function exec($query, array $params = [])
+    public function exec($query, array $params = [], $fetchStyle = \PDO::FETCH_ASSOC)
     {
+        try {
+            $this->begin();
+            $state = $this->db->prepare($query);
+            $result = $state->execute($params);
+            $this->commit();
+            if ($result) {
+                $result = $state->fetchAll($fetchStyle);
+            }
+            return $result;
+        } catch (\Exception $e) {
+            $this->rollBack();
+        }
+        return false;
+    }
 
+    public function begin()
+    {
+        $this->db->beginTransaction();
+    }
+
+    public function commit()
+    {
+        $this->db->commit();
+    }
+
+    public function rollBack()
+    {
+        $this->db->rollBack();
+    }
+
+    public function error($mode = true)
+    {
+        if ($mode) {
+            return $this->db->errorInfo();
+        } else {
+            return $this->db->errorCode();
+        }
     }
 }

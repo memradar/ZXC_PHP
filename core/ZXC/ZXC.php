@@ -7,6 +7,7 @@ require_once 'Mod/Autoload.php';
 use ZXC\Mod\HTTP;
 use ZXC\Mod\Logger;
 use ZXC\Mod\Autoload;
+use ZXC\Mod\Route;
 use ZXC\Traits\Config;
 use ZXC\Traits\Helper;
 
@@ -46,6 +47,11 @@ class ZXC extends Factory
 
     public function go()
     {
+        /**
+         * @var $http Mod\HTTP
+         * @var $router Mod\Router
+         * @var $routeParams Mod\Route
+         */
         $router = $this->getModule('Router');
         $http = $this->getModule('HTTP');
         $routeParams = $router->getCurrentRoutParams(
@@ -55,17 +61,18 @@ class ZXC extends Factory
             $http->sendHeader(404);
             return false;
         }
-
         ob_start();
         $routeParams->executeRoute($this);
         $body = ob_get_clean();
         echo $body;
-
         return true;
     }
 
     public function sysLog($msg = '', $param = [])
     {
+        /**
+         * @var $logger Mod\Logger
+         */
         $logger = $this->getModule('Logger');
         if (!$logger) {
             return false;
