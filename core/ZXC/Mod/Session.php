@@ -38,6 +38,7 @@ class Session implements Module
             $this->domain = $zxc->get('HOST');
         }
         if (!isset($config['name'])) {
+            //if session.auto_start is enabled by default you must set session name in php.ini
             $this->name = 'zxc';
         }
         $this->initialize();
@@ -75,6 +76,7 @@ class Session implements Module
      */
     public function initialize()
     {
+        session_name($this->name);
         $this->start();
         session_set_cookie_params($this->lifeTime, $this->path, $this->domain);
         $this->prefix = 'zxc';
