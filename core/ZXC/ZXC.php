@@ -44,6 +44,10 @@ class ZXC extends Factory
         $this->web['GET'] = &$_GET;
     }
 
+    public function get($key)
+    {
+        return isset($this->web[$key]) ? $this->web[$key] : false;
+    }
 
     public function go()
     {
