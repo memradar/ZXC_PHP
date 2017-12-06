@@ -9,8 +9,8 @@
 namespace ZXC\Mod;
 
 
-use ZXC\Interfaces\Module;
 use ZXC\ZXC;
+use ZXC\Interfaces\Module;
 
 class Session implements Module
 {
@@ -19,6 +19,7 @@ class Session implements Module
     private $prefix;
     private $path;
     private $domain;
+    private $name;
 
     /**
      * Session constructor.
@@ -35,6 +36,9 @@ class Session implements Module
         }
         if (!isset($config['domain'])) {
             $this->domain = $zxc->get('HOST');
+        }
+        if (!isset($config['name'])) {
+            $this->name = 'zxc';
         }
         $this->initialize();
     }
@@ -80,8 +84,6 @@ class Session implements Module
             $this->set('id', session_id());
             $this->set('start', $this->getTime());
         }
-
-        $this->isEnabled();
     }
 
     /**
