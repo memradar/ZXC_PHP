@@ -3,7 +3,6 @@
 namespace ZXC\Mod;
 
 use ZXC\Factory;
-use ZXC\Mod\Logger;
 
 class Router extends Factory
 {
@@ -23,11 +22,7 @@ class Router extends Factory
         if ($routes) {
             foreach ($routes as $route) {
                 if (isset($route['route'])) {
-                    $parsedRoute = $this->parseRoute($route);
-                    $parsedRouteType = $parsedRoute->getType();
-                    if (isset($this->routeTypes[$parsedRouteType]) && $this->routeTypes[$parsedRouteType] === true) {
-                        $this->routes[$parsedRouteType][$parsedRoute->getRoute()] = $parsedRoute;
-                    }
+                    $this->parseRoute($route);
                 }
             }
         }
@@ -46,6 +41,14 @@ class Router extends Factory
             'class' => $classAndMethod[0],
             'method' => $classAndMethod[1]
         ];
+    }
+
+    private function setRoute(Route $parsedRoute)
+    {
+        $parsedRouteType = $parsedRoute->getType();
+        if (isset($this->routeTypes[$parsedRouteType]) && $this->routeTypes[$parsedRouteType] === true) {
+            $this->routes[$parsedRouteType][$parsedRoute->getRoute()] = $parsedRoute;
+        }
     }
 
     private function parseRoute($route)
@@ -88,9 +91,40 @@ class Router extends Factory
             'func' => isset($route['call']) ? $route['call'] : null,
             'before' => $before,
             'after' => $after,
+            'children' => isset($route['children']) ? $route['children'] : null,
             'hooksResultTransfer' => isset($route['hooksResultTransfer']) ? $route['hooksResultTransfer'] : null
         ];
-        return new Route($params);
+
+        $route = new Route($params);
+        $this->setRoute($route);
+        $children = $route->getChildren();
+        if ($children) {
+            $childParams = explode('|', $children['route']);
+            if (count($childParams) < 2) {
+                //TODO invalid parameters
+                return null;
+            } else {
+                if (count($childParams) === 2) {
+                    $slash = substr($children['route'], 0, 1);
+                    if ($slash !== '/') {
+                        $children['route'] = $route->getType() . '|' . $route->getRoute() . '/' . $children['route'];
+                    }
+                } else {
+                    $childType = $childParams[0];
+                    $path = $childParams[1];
+                    $haveParent = strpos($path, $route->getRoute());
+                    if (!$haveParent) {
+                        $slash = substr($path, 0, 1);
+                        if ($slash !== '/') {
+                            $path = $route->getRoute() . '/' . $path;
+                            $children['route'] = $childType . '|' . $path . '|' . $childParams[2];
+                        }
+                    }
+                }
+                $this->parseRoute($children);
+            }
+        }
+        return true;
     }
 
     public function disableRouterType($type)
@@ -115,7 +149,9 @@ class Router extends Factory
         } else {
             $path = $uri;
         }
-
+        /**
+         * @var $route Route
+         */
         foreach ($this->routes[$method] as $route) {
             $ok = preg_match($route->getReg(), $path, $matches);
             if ($ok) {

@@ -23,6 +23,7 @@ class Route
     private $before;
     private $after;
     private $hooksResultTransfer;
+    private $children;
 
     public function __construct(array $params = [])
     {
@@ -222,5 +223,13 @@ class Route
                 $this->func, [$zxc, $this->params]
             );
         }
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getChildren()
+    {
+        return $this->children;
     }
 }
