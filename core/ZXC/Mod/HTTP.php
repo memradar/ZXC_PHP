@@ -104,6 +104,15 @@ class HTTP extends Factory
         $this->port = &$this->server['SERVER_PORT'];
         $this->scheme = &$this->server['REQUEST_SCHEME'];
         $this->protocol = &$this->server['SERVER_PROTOCOL'];
+        $this->normalize();
+    }
+
+    private function normalize()
+    {
+        $lastSlash = substr($this->path, -1);
+        if ($lastSlash === '/') {
+            $this->path = rtrim($this->path, '/');
+        }
     }
 
     function reinitialize()
