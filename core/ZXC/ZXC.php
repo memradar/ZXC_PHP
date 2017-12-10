@@ -5,8 +5,6 @@ namespace ZXC;
 require_once 'Mod/Autoload.php';
 
 use ZXC\Mod\HTTP;
-use ZXC\Mod\Autoload;
-use ZXC\Mod\Route;
 use ZXC\Traits\Config;
 use ZXC\Traits\Helper;
 
@@ -22,19 +20,24 @@ class ZXC extends Factory
     use Helper;
     use Config;
 
-    protected function __construct()
+    protected function __construct(array $config = [])
     {
-        $this->initializeMainProperties();
+        if ($config) {
+            $this->setConfig($config);
+        }
     }
 
-    public function reinitialize()
+    function reinitialize()
     {
-        $this->initializeMainProperties();
+        // TODO: Implement reinitialize() method.
     }
 
+    /**
+     * @deprecated
+     */
     private function initializeMainProperties()
     {
-        $this->http = HTTP::getInstance();
+        $this->http = $this->getModule('HTTP');
     }
 
     public function get($key)
@@ -45,17 +48,17 @@ class ZXC extends Factory
     public function go()
     {
         /**
-         * @var $this ->http Mod\HTTP
+         * @var $http Mod\HTTP
          * @var $router Mod\Router
          * @var $routeParams Mod\Route
          */
         $router = $this->getModule('Router');
-//        $http = $this->getModule('HTTP');
+        $http = $this->getModule('HTTP');
         $routeParams = $router->getCurrentRoutParams(
-            $this->http->getPath(), $this->http->getBaseRoute(), $this->http->getMethod()
+            $http->getPath(), $http->getBaseRoute(), $http->getMethod()
         );
         if (!$routeParams) {
-            $this->http->sendHeader(404);
+            $http->sendHeader(404);
             return false;
         }
         ob_start();

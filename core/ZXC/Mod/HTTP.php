@@ -88,7 +88,9 @@ class HTTP extends Factory
     private $server;
     private $method;
     private $scheme;
+    private $protocol;
     private $baseRoute;
+
 
     public function __construct()
     {
@@ -101,10 +103,12 @@ class HTTP extends Factory
         $this->host = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : null;
         $this->port = &$this->server['SERVER_PORT'];
         $this->scheme = &$this->server['REQUEST_SCHEME'];
+        $this->protocol = &$this->server['SERVER_PROTOCOL'];
     }
 
     function reinitialize()
     {
+        $stop = false;
         // TODO: Implement reinitialize() method.
     }
 
@@ -135,12 +139,12 @@ class HTTP extends Factory
 
     public function getScheme()
     {
-
+        return $this->scheme;
     }
 
     public function getProtocolVersion()
     {
-
+        return $this->protocol;
     }
 
     /**
