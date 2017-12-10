@@ -4,7 +4,6 @@ namespace ZXC;
 
 require_once 'Mod/Autoload.php';
 
-use ZXC\Mod\HTTP;
 use ZXC\Traits\Config;
 
 class ZXC extends Factory
@@ -67,5 +66,13 @@ class ZXC extends Factory
         }
         $logger->debug($msg, $param);
         return true;
+    }
+
+    /**
+     * @return string
+     */
+    public function getVersion(): string
+    {
+        return $this->version;
     }
 }
