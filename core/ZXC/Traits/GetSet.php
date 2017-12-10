@@ -20,6 +20,7 @@ trait GetSet
         } else {
             return false;
         }
+
     }
 
     public function set($key, $value)
