@@ -5,7 +5,6 @@ namespace ZXC;
 require_once 'Mod/Autoload.php';
 
 use ZXC\Mod\HTTP;
-use ZXC\Mod\Logger;
 use ZXC\Mod\Autoload;
 use ZXC\Mod\Route;
 use ZXC\Traits\Config;
@@ -14,9 +13,9 @@ use ZXC\Traits\Helper;
 
 class ZXC extends Factory
 {
-    private $logger;
-    private $router;
-    private $web = [];
+    /**
+     * @var http Mod\HTTP
+     */
     private $http;
     private $version = '0.0.1-a';
 
@@ -25,44 +24,38 @@ class ZXC extends Factory
 
     protected function __construct()
     {
-        $this->fillMain();
+        $this->initializeMainProperties();
     }
 
     public function reinitialize()
     {
-        // TODO: Implement initialize() method.
+        $this->initializeMainProperties();
     }
 
-    private function fillMain()
+    private function initializeMainProperties()
     {
-        $this->web['URI'] = &$_SERVER['REQUEST_URI'];
-        $this->web['HOST'] = isset($_SERVER['SERVER_NAME'])
-            ? $_SERVER['SERVER_NAME'] : null;
-        $this->web['METHOD'] = &$_SERVER['REQUEST_METHOD'];
-        $this->web['BASE_ROUTE'] = dirname($_SERVER['SCRIPT_NAME']);
-        $this->web['POST'] = &$_POST;
-        $this->web['GET'] = &$_GET;
+        $this->http = HTTP::getInstance();
     }
 
     public function get($key)
     {
-        return isset($this->web[$key]) ? $this->web[$key] : false;
+        return isset($this->$key) ? $this->$key : null;
     }
 
     public function go()
     {
         /**
-         * @var $http Mod\HTTP
+         * @var $this ->http Mod\HTTP
          * @var $router Mod\Router
          * @var $routeParams Mod\Route
          */
         $router = $this->getModule('Router');
-        $http = $this->getModule('HTTP');
+//        $http = $this->getModule('HTTP');
         $routeParams = $router->getCurrentRoutParams(
-            $this->web['URI'], $this->web['BASE_ROUTE'], $this->web['METHOD']
+            $this->http->getPath(), $this->http->getBaseRoute(), $this->http->getMethod()
         );
         if (!$routeParams) {
-            $http->sendHeader(404);
+            $this->http->sendHeader(404);
             return false;
         }
         ob_start();
