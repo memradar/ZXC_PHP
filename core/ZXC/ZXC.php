@@ -6,18 +6,11 @@ require_once 'Mod/Autoload.php';
 
 use ZXC\Mod\HTTP;
 use ZXC\Traits\Config;
-use ZXC\Traits\Helper;
-
 
 class ZXC extends Factory
 {
-    /**
-     * @var http Mod\HTTP
-     */
-    private $http;
     private $version = '0.0.1-a';
 
-    use Helper;
     use Config;
 
     protected function __construct(array $config = [])
@@ -30,14 +23,6 @@ class ZXC extends Factory
     function reinitialize()
     {
         // TODO: Implement reinitialize() method.
-    }
-
-    /**
-     * @deprecated
-     */
-    private function initializeMainProperties()
-    {
-        $this->http = $this->getModule('HTTP');
     }
 
     public function get($key)
