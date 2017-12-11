@@ -12,6 +12,7 @@ use ZXC\Factory;
 
 class HTTP extends Factory
 {
+    //TODO PSR-7
     /**
      * https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
      * @var array
@@ -117,7 +118,6 @@ class HTTP extends Factory
 
     function reinitialize()
     {
-        $stop = false;
         // TODO: Implement reinitialize() method.
     }
 

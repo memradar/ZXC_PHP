@@ -14,4 +14,13 @@ trait Helper
 
         return array_keys($arr) !== range(0, count($arr) - 1);
     }
+
+    public function isWindows()
+    {
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
