@@ -21,6 +21,7 @@ class Stream implements StreamInterface
     use Helper;
     /**
      * @var array
+     * @link from https://github.com/guzzle/streams/blob/master/src/Stream.php
      */
     private static $readWriteHash = [
         'read' => [
@@ -70,7 +71,6 @@ class Stream implements StreamInterface
     public function __construct($stream, $mode = 'r')
     {
         $this->attach($stream, $mode);
-        //TODOnExceptions messages
     }
 
     public function __destruct()
@@ -81,7 +81,7 @@ class Stream implements StreamInterface
     public function attach($stream, $mode)
     {
         if (!$stream) {
-            throw new \InvalidArgumentException();
+            throw new \InvalidArgumentException('Invalid argument $stream');
         }
         if ($this->isWindows() && strpos($mode, 'b') === false) {
             $mode = $mode . 'b';
@@ -93,7 +93,7 @@ class Stream implements StreamInterface
         } elseif (is_resource($stream)) {
             $this->resource = $stream;
         } else {
-            throw new \InvalidArgumentException();
+            throw new \InvalidArgumentException('Invalid argument $stream');
         }
         $this->meta = stream_get_meta_data($this->resource);
     }
@@ -169,11 +169,11 @@ class Stream implements StreamInterface
     public function tell()
     {
         if (!$this->resource) {
-            throw new \RuntimeException();
+            throw new \RuntimeException('Undefined resource');
         }
         $result = ftell($this->resource);
         if ($result === false) {
-            throw new \RuntimeException();
+            throw new \RuntimeException('Error ftell');
         }
         return $result;
     }
@@ -214,11 +214,11 @@ class Stream implements StreamInterface
     public function seek($offset, $whence = SEEK_SET)
     {
         if (!$this->resource || !$this->isSeekable()) {
-            throw new \RuntimeException();
+            throw new \RuntimeException('Undefined resource');
         }
         $result = fseek($this->resource, $offset, $whence);
         if ($result === -1) {
-            throw new \RuntimeException();
+            throw new \RuntimeException('Error fseek');
         }
         return true;
     }
@@ -259,11 +259,11 @@ class Stream implements StreamInterface
     public function write($string)
     {
         if (!$this->resource) {
-            throw new \RuntimeException();
+            throw new \RuntimeException('Undefined resource');
         }
         $file = fwrite($this->resource, $string);
         if ($file) {
-            throw new \RuntimeException();
+            throw new \RuntimeException('Error fwrite');
         }
         return $file;
     }
@@ -295,7 +295,7 @@ class Stream implements StreamInterface
         }
         $content = fread($this->resource, $length);
         if ($content === false) {
-            throw new \RuntimeException();
+            throw new \RuntimeException('Error fread');
         }
         return $content;
     }
@@ -314,7 +314,7 @@ class Stream implements StreamInterface
         }
         $contents = stream_get_contents($this->resource);
         if ($contents === false) {
-            throw new \RuntimeException();
+            throw new \RuntimeException('Error stream_get_contents');
         }
         return $contents;
     }
