@@ -89,7 +89,7 @@ class Stream implements StreamInterface
 
         $this->stream = $stream;
         if (is_string($stream)) {
-            fopen($stream, $mode);
+            $this->resource = fopen($stream, $mode);
         } elseif (is_resource($stream)) {
             $this->resource = $stream;
         } else {
