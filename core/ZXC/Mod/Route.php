@@ -29,9 +29,12 @@ class Route
     {
         $zxc = ZXC::getInstance();
         if (!$params) {
-            $zxc->logger->critical('Route is not valid! Must be like this \'POST|/test/:route/|Class:method\'',
-                $params);
-            throw new \Exception(
+            $logger = $zxc->getModule('Logger');
+            if ($logger) {
+                $logger->critical('Route is not valid! Must be like this \'POST|/test/:route/|Class:method\'',
+                    $params);
+            }
+            throw new \InvalidArgumentException(
                 'Route is not valid! Must be like this \'POST|/test/:route/|Class:method\''
             );
         }

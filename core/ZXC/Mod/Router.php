@@ -12,6 +12,9 @@ class Router extends Factory
     public function reinitialize()
     {
         $params = func_get_args();
+        if (!$params) {
+            throw new \InvalidArgumentException('Undefined $params');
+        }
         foreach ($params as $item) {
             $this->registerRoutes($item);
         }
@@ -19,11 +22,12 @@ class Router extends Factory
 
     public function registerRoutes(array $routes = [])
     {
-        if ($routes) {
-            foreach ($routes as $route) {
-                if (isset($route['route'])) {
-                    $this->parseRoute($route);
-                }
+        if (!$routes) {
+            throw new \InvalidArgumentException('Undefined $routes');
+        }
+        foreach ($routes as $route) {
+            if (isset($route['route'])) {
+                $this->parseRoute($route);
             }
         }
     }
