@@ -216,4 +216,20 @@ class Router extends Factory
 
         return $patternAsRegex;
     }
+
+    /**
+     * @return array
+     */
+    public function getRoutes(): array
+    {
+        return $this->routes;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRouteTypes(): array
+    {
+        return $this->routeTypes;
+    }
 }

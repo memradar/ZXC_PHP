@@ -235,4 +235,28 @@ class Route
     {
         return $this->children;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getBefore()
+    {
+        return $this->before;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAfter()
+    {
+        return $this->after;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getHooksResultTransfer()
+    {
+        return $this->hooksResultTransfer;
+    }
 }
