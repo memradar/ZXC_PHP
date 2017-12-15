@@ -26,6 +26,9 @@ class RouterRouteTest extends TestCase
         $this->getZXC();
     }
 
+    /**
+     * Set test class variables $config and $zxc
+     */
     public function getZXC()
     {
         $config = $this->config = require_once '../config/config.php';

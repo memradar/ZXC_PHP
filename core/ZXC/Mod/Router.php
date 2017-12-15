@@ -35,7 +35,7 @@ class Router extends Factory
     public function parseHooks($params = '')
     {
         if (!$params) {
-            return false;
+            throw new \InvalidArgumentException('Undefined $params');
         }
         $classAndMethod = explode(':', $params);
         if (!$classAndMethod || count($classAndMethod) > 2) {
@@ -60,10 +60,7 @@ class Router extends Factory
         //TODO regexp
         $params = explode('|', $route['route']);
         if (!$params || count($params) < 2) {
-            return false;
-//            throw new \Exception(
-//                'Route is not valid! Must be like this \'POST|/test/:route/|Class:method\''
-//            );
+            throw new \InvalidArgumentException('Undefined $params');
         }
         $classAndMethod = [];
         if (isset($params[2])) {
@@ -145,8 +142,11 @@ class Router extends Factory
 
     public function getCurrentRoutParams($uri, $base, $method)
     {
+        if (!$uri || !$base || !$method) {
+            throw new \InvalidArgumentException('Undefined $params');
+        }
         if (!isset($this->routes[$method])) {
-            return null;
+            return false;
         }
         if ($base != '/') {
             $path = substr($uri, strlen($base));
@@ -183,12 +183,12 @@ class Router extends Factory
      * @param $pattern
      *
      * @return bool|string
-     * Thanks https://stackoverflow.com/questions/30130913/how-to-do-url-matching-regex-for-routing-framework/30359808#30359808
+     * @link Thanks https://stackoverflow.com/questions/30130913/how-to-do-url-matching-regex-for-routing-framework/30359808#30359808
      */
     private function getRegex($pattern)
     {
         if (preg_match('/[^-:\/_{}()a-zA-Z\d]/', $pattern)) {
-            return false;
+            throw new \InvalidArgumentException('Invalid pattern');
         } // Invalid pattern
 
         // Turn "(/)" into "/?"
@@ -215,11 +215,5 @@ class Router extends Factory
         $patternAsRegex = "@^" . $pattern . "$@D";
 
         return $patternAsRegex;
-    }
-
-    public function __construct()
-    {
-//        $loger = new Logger(['filePath' => '../conf/router.log', 'root' => true]);
-//        $loger->info('router ->>>>>>> test message', ['testContext' => 'qwerty']);
     }
 }
