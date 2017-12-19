@@ -100,9 +100,6 @@ class DB implements Module
     public function exec($query, array $params = [], $fetchStyle = \PDO::FETCH_ASSOC)
     {
         $isArray = is_array($query);
-        if ($isArray && count($query) !== count($params)) {
-            return false;
-        }
         $resultArr = [];
         try {
             if ($isArray) {
