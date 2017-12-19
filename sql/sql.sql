@@ -15,15 +15,16 @@ CREATE TABLE IF NOT EXISTS zxc.users
   avatar                VARCHAR(30),
   fonimage              VARCHAR(30),
   basedirectory         VARCHAR(15),
+  role                  INTEGER,
   CONSTRAINT users_login_id_pk
   PRIMARY KEY (login, id)
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS users_id_uindex
-  ON users (id);
+  ON zxc.users (id);
 
 CREATE UNIQUE INDEX IF NOT EXISTS users_login_uindex
-  ON users (login);
+  ON zxc.users (login);
 
 CREATE UNIQUE INDEX IF NOT EXISTS users_email_uindex
-  ON users (email);
+  ON zxc.users (email);
