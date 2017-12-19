@@ -110,6 +110,7 @@ class Route
 
     private function callBefore(ZXC $zxc)
     {
+        $paramsForSecondRouteArguments['routeParams'] = $this->params;
         $resultBefore = null;
         if ($this->before) {
             if (is_array($this->before)) {
@@ -118,23 +119,23 @@ class Route
                     if ($this->hooksResultTransfer) {
                         $resultBefore = call_user_func_array(
                             [$userClassBefore, $this->before['method']],
-                            [$zxc, $this->params]
+                            [$zxc, $paramsForSecondRouteArguments]
                         );
                     } else {
                         call_user_func_array(
                             [$userClassBefore, $this->before['method']],
-                            [$zxc, $this->params]
+                            [$zxc, $paramsForSecondRouteArguments]
                         );
                     }
                 }
             } else {
                 if ($this->hooksResultTransfer) {
                     $resultBefore = call_user_func_array(
-                        $this->before, [$zxc, $this->params]
+                        $this->before, [$zxc, $paramsForSecondRouteArguments]
                     );
                 } else {
                     call_user_func_array(
-                        $this->before, [$zxc, $this->params]
+                        $this->before, [$zxc, $paramsForSecondRouteArguments]
                     );
                 }
             }
@@ -142,34 +143,24 @@ class Route
         return $resultBefore;
     }
 
-    private function callAfter(ZXC $zxc, $result = null)
+    private function callAfter(ZXC $zxc, $resultMain = null)
     {
+        $paramsForSecondRouteArguments['routeParams'] = $this->params;
+        $paramsForSecondRouteArguments['resultMain'] = $resultMain;
+
         if ($this->after) {
             if (is_array($this->after)) {
                 if (class_exists($this->after['class'])) {
                     $userClassBefore = new $this->after['class'];
-                    if ($result) {
-                        call_user_func_array(
-                            [$userClassBefore, $this->after['method']],
-                            [$zxc, $this->params, $result]
-                        );
-                    } else {
-                        call_user_func_array(
-                            [$userClassBefore, $this->after['method']],
-                            [$zxc, $this->params]
-                        );
-                    }
+                    call_user_func_array(
+                        [$userClassBefore, $this->after['method']],
+                        [$zxc, $paramsForSecondRouteArguments]
+                    );
                 }
             } else {
-                if ($result) {
-                    call_user_func_array(
-                        $this->after, [$zxc, $this->params, $result, $result]
-                    );
-                } else {
-                    call_user_func_array(
-                        $this->after, [$zxc, $this->params]
-                    );
-                }
+                call_user_func_array(
+                    $this->after, [$zxc, $paramsForSecondRouteArguments]
+                );
             }
         }
         return true;
@@ -180,7 +171,8 @@ class Route
         $resultMainFunc = null;
         $resultBefore = null;
         $resultAfter = null;
-
+        $paramsForSecondRouteArguments = [];
+        $paramsForSecondRouteArguments['routeParams'] = $this->params;
         if ($this->class) {
             if (!class_exists($this->class)) {
                 $zxc = ZXC::getInstance();
@@ -193,7 +185,7 @@ class Route
                 );
                 call_user_func_array(
                     [$userClass, $this->method],
-                    [$zxc, $this->params]
+                    [$zxc, $paramsForSecondRouteArguments]
                 );
             } else {
                 if (class_exists($this->class)) {
@@ -206,25 +198,38 @@ class Route
                     $resultBefore = $this->callBefore($zxc);
                     if (method_exists($userClass, $this->method)) {
                         if ($this->hooksResultTransfer) {
+                            $paramsForSecondRouteArguments['resultBefore'] = $resultBefore;
                             $resultMainFunc = call_user_func_array(
                                 [$userClass, $this->method],
-                                [$zxc, $this->params, $resultBefore]
+                                [$zxc, $paramsForSecondRouteArguments]
                             );
                             $this->callAfter($zxc, $resultMainFunc);
                         } else {
                             call_user_func_array(
                                 [$userClass, $this->method],
-                                [$zxc, $this->params]
+                                [$zxc, $paramsForSecondRouteArguments]
                             );
                             $this->callAfter($zxc);
                         }
                     }
                 }
             }
+        } elseif (is_callable($this->func)) {
+            $resultBefore = $this->callBefore($zxc);
+            if ($this->hooksResultTransfer) {
+                $paramsForSecondRouteArguments['resultBefore'] = $resultBefore;
+                $resultMainFunc = call_user_func_array(
+                    $this->func, [$zxc, $paramsForSecondRouteArguments]
+                );
+                $this->callAfter($zxc, $resultMainFunc);
+            } else {
+                call_user_func_array(
+                    $this->func, [$zxc, $paramsForSecondRouteArguments]
+                );
+                $this->callAfter($zxc);
+            }
         } else {
-            call_user_func_array(
-                $this->func, [$zxc, $this->params]
-            );
+            throw new \InvalidArgumentException('Main function or method is not defined for the route');
         }
     }
 

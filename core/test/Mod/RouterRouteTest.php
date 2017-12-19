@@ -9,30 +9,40 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 
+define('ZXC_ROOT_TEST_DIR', __DIR__);
+
 class RoutesTest
 {
-    public function main(\ZXC\ZXC $zxc, $params = null, $resultBefore = null)
+    public function main(\ZXC\ZXC $zxc, $params = null)
     {
-        if (!$resultBefore) {
+        if (!$params['resultBefore']) {
             throw new \InvalidArgumentException();
         }
-        return 'main' . $resultBefore;
+        return 'main' . $params['resultBefore'];
     }
 
     public function before(\ZXC\ZXC $zxc, $params)
     {
-        if ($params !== null) {
+        if ($params['routeParams'] !== null) {
             throw new \InvalidArgumentException();
         }
         return 'before';
     }
 
-    public function after(\ZXC\ZXC $zxc, $params, $resultMain)
+    public function before2(\ZXC\ZXC $zxc, $params)
     {
-        if (!$resultMain) {
+        if ($params['routeParams'] !== null) {
             throw new \InvalidArgumentException();
         }
-        return 'after' . $resultMain;
+        return 'before';
+    }
+
+    public function after(\ZXC\ZXC $zxc, $params)
+    {
+        if (!$params['resultMain'] || $params['resultMain'] !== 'mainbefore') {
+            throw new \InvalidArgumentException();
+        }
+        return 'after' . $params['resultMain'];
     }
 }
 
@@ -58,8 +68,9 @@ class RouterRouteTest extends TestCase
      */
     public function getZXC()
     {
-        $config = $this->config = require_once '../config/config.php';
-        require_once '../../ZXC/../index.php';
+
+        $config = $this->config = require_once ZXC_ROOT_TEST_DIR . '/../config/config.php';
+        require_once ZXC_ROOT_TEST_DIR . '/../../ZXC/../index.php';
         $this->zxc = \ZXC\ZXC::getInstance();
     }
 
@@ -119,15 +130,18 @@ class RouterRouteTest extends TestCase
                 'hooksResultTransfer' => true
             ],
             [
-                'route' => 'GET|/:user|QWEQ:user',
-                'call' => function ($zxc) {
-                    $stop = $zxc;
+                'route' => 'GET|/:user',
+                'call' => function (\ZXC\ZXC $zxc, $params = null) {
+                    if ($params['resultBefore'] !== 'before') {
+                        throw new \InvalidArgumentException();
+                    }
+                    return 'main' . $params['resultBefore'];
                 },
-                'before' => 'ASD\TestClass:before',
-                'after' => function ($z, $p, $result) {
-                    $zxc = $z;
-                    $params = $p;
-                    echo 'after hooks=>' . $result;
+                'before' => 'RoutesTest:before2',
+                'after' => function (\ZXC\ZXC $zxc, $params = null) {
+                    if (!$params['resultMain'] || $params['resultMain'] !== 'mainbefore') {
+                        throw new \InvalidArgumentException();
+                    }
                 },
                 'hooksResultTransfer' => true,
                 'children' => [
@@ -178,6 +192,6 @@ class RouterRouteTest extends TestCase
         $this->assertEquals(count($routeTypes['POST']), true);
         $this->assertEquals(count($routeTypes['GET']), true);
         $routes['GET']['/']->executeRoute($this->zxc);
-        $Router->getCurrentRoutParams();
+        $routes['GET']['/:user']->executeRoute($this->zxc);
     }
 }
