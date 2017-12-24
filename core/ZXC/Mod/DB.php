@@ -8,6 +8,8 @@
 
 namespace ZXC\Mod;
 
+use ZXC\Factory;
+use ZXC\Traits\Singleton;
 use ZXC\ZXC;
 use ZXC\Interfaces\Module;
 
@@ -25,7 +27,9 @@ class DB implements Module
     private $dns;
     private $name;
     private $pass;
+    private $error;
     private $dbType;
+    private $columnsBlocked;
     private $persistent;
     private $transaction;
 
@@ -54,6 +58,7 @@ class DB implements Module
         $this->persistent = $params['persistent'];
         $this->name = $params['name'];
         $this->pass = $params['pass'];
+        $this->columnsBlocked = isset($params['columns']) ? $params['columns'] : null;
     }
 
     public function initialize()
@@ -125,12 +130,13 @@ class DB implements Module
                 $result = $state->execute($params);
                 $this->commit();
                 if ($result) {
-                    $resultArr[] = $state->fetchAll($fetchStyle);
+                    $resultArr = $state->fetchAll($fetchStyle);
                 }
             }
             return $resultArr;
         } catch (\Exception $e) {
             $this->rollBack();
+            $this->error = true;
         }
         return false;
     }
@@ -157,5 +163,35 @@ class DB implements Module
         } else {
             return $this->db->errorCode();
         }
+    }
+
+    public function getAllColumns($tableSchema, $tableName, $fetchStyle = \PDO::FETCH_ASSOC)
+    {
+        $columns = [];
+        $query = 'SELECT * FROM information_schema.columns WHERE table_schema = ? AND table_name = ?';
+        $result = $this->exec($query, [$tableSchema, $tableName], $fetchStyle);
+        if (!$result) {
+            return $columns;
+        }
+        $tableInConfig = isset($this->columnsBlocked[$tableName]) && isset($this->columnsBlocked[$tableName]['blocked'])
+            ? $this->columnsBlocked[$tableName]['blocked'] : null;
+        $isObject = is_object($result[0]);
+        foreach ($result as $item) {
+            if (is_object($item)) {
+
+                if (isset($tableInConfig[$item->column_name]) && !$tableInConfig[$item->column_name]) {
+                    $columns[$item->column_name] = null;
+                } elseif (!isset($tableInConfig[$item->column_name])) {
+                    $columns[$item->column_name] = null;
+                }
+            } else {
+                if (isset($tableInConfig[$item['column_name']]) && !$tableInConfig[$item['column_name']]) {
+                    $columns[$item['column_name']] = null;
+                } elseif (!isset($tableInConfig[$item['column_name']])) {
+                    $columns[$item['column_name']] = null;
+                }
+            }
+        }
+        return $isObject ? (object)$columns : $columns;
     }
 }

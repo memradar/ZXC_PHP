@@ -6,7 +6,7 @@
  * Time: 23:44
  */
 
-namespace ZXC;
+namespace ZXC\Traits;
 
 
 trait Singleton

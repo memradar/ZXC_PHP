@@ -10,6 +10,7 @@ namespace ZXC\Traits;
 
 trait Config
 {
+    private $sourceConfig;
     private $configModule;
 
     public function setConfig(array $config = [])
@@ -17,7 +18,7 @@ trait Config
         if (!$config) {
             return false;
         }
-
+        $this->sourceConfig = $config;
         foreach ($config as $nameSpaces => $modules) {
             foreach ($modules as $moduleName => $moduleParams) {
                 $class = $this->getModuleClassName($nameSpaces, $moduleName, $moduleParams);
@@ -53,5 +54,26 @@ trait Config
             return false;
         }
         return $this->configModule[$moduleName];
+    }
+
+    /**
+     * @param string $path path to parameters from config ('ZXC\Mod/DB/db')
+     * @return null || parameter
+     */
+    public function getConfigParameters($path = '')
+    {
+        if (!$path) {
+            return null;
+        }
+        $path = explode('/', $path);
+        $configParameters = $this->sourceConfig;
+        foreach ($path as $item) {
+            if (isset($configParameters[$item])) {
+                $configParameters = $configParameters[$item];
+            } else {
+                return null;
+            }
+        }
+        return $configParameters;
     }
 }

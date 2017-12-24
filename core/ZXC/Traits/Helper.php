@@ -23,4 +23,52 @@ trait Helper
             return false;
         }
     }
+
+    public function isValidPassword($sourcePassword)
+    {
+
+    }
+
+    public function isStrengthPassword($password)
+    {
+        //TODO
+        return true;
+    }
+
+    public function isEmail($email = null, $mx = true)
+    {
+        if (!$email) {
+            return false;
+        }
+        if (!$mx) {
+            if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                return true;
+            }
+        } else {
+            return filter_var($email, FILTER_VALIDATE_EMAIL) && (getmxrr(substr($email, strrpos($email, '@') + 1),
+                    $hosts));
+        }
+    }
+
+    public function getCleanEmail($email)
+    {
+        $result = filter_var($email, FILTER_SANITIZE_EMAIL);
+        return $result;
+    }
+
+    public function getPasswordHash($password = null, $cost = 10)
+    {
+        if ($password === null) {
+            throw new \InvalidArgumentException('Password is not defined');
+        }
+        $options = [
+            'cost' => $cost,
+        ];
+        return password_hash($password, PASSWORD_BCRYPT, $options);
+    }
+
+    public function isIP($ip)
+    {
+        return filter_var($ip, FILTER_VALIDATE_IP);
+    }
 }

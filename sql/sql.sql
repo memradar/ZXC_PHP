@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS zxc.users
   fonimage              VARCHAR(30),
   basedirectory         VARCHAR(15),
   role                  INTEGER,
+  block                 INTEGER DEFAULT 1,
   CONSTRAINT users_login_id_pk
   PRIMARY KEY (login, id)
 );

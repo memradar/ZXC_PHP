@@ -4,6 +4,7 @@ namespace ZXC;
 
 require_once 'Mod/Autoload.php';
 
+use PHPUnit\Runner\Exception;
 use ZXC\Traits\Config;
 
 class ZXC extends Factory
