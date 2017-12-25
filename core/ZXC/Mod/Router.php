@@ -9,6 +9,12 @@ class Router extends Factory
     private $routes = [];
     private $routeTypes = ['POST' => true, 'GET' => true];
 
+    public function __construct()
+    {
+        $params = func_get_args();
+        $this->reinitialize($params ? $params[0] : null);
+    }
+
     public function reinitialize()
     {
         $params = func_get_args();

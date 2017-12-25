@@ -44,15 +44,15 @@ trait Helper
             if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 return true;
             }
-        } else {
-            return filter_var($email, FILTER_VALIDATE_EMAIL) && (getmxrr(substr($email, strrpos($email, '@') + 1),
-                    $hosts));
         }
+        return filter_var($email, FILTER_VALIDATE_EMAIL) && (getmxrr(substr($email, strrpos($email, '@') + 1),
+                $hosts));
+
     }
 
     public function getCleanEmail($email)
     {
-        $result = filter_var($email, FILTER_SANITIZE_EMAIL);
+        $result = strtolower(filter_var($email, FILTER_SANITIZE_EMAIL));
         return $result;
     }
 

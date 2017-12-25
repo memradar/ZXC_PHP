@@ -14,7 +14,12 @@ abstract class Factory
     {
         $params = func_get_args();
         $className = static::getClassName();
+        /**
+         * If we create instance now we send params to construct
+         */
+        $createdNow = false;
         if (!isset(self::$instances[$className])) {
+            $createdNow = true;
             if ($params) {
                 if (version_compare(PHP_VERSION, '5.6.0', '>=')) {
                     self::$instances[$className] = new $className(...$params);
@@ -26,7 +31,11 @@ abstract class Factory
                 self::$instances[$className] = new $className();
             }
         }
-        if ($params) {
+        /**
+         * If we call Class::getInstance with arguments and class
+         * was created before we call reinitialize with given arguments
+         */
+        if ($params && !$createdNow) {
             call_user_func_array([self::$instances[$className], 'reinitialize'], $params);
         }
 
@@ -44,20 +53,6 @@ abstract class Factory
     final protected static function getClassName()
     {
         return get_called_class();
-    }
-
-    public function set($key, $value)
-    {
-        $this->$key = $value;
-    }
-
-    public function get($key)
-    {
-        if (isset($this->$key)) {
-            return $this->$key;
-        } else {
-            return null;
-        }
     }
 
     protected function __construct()

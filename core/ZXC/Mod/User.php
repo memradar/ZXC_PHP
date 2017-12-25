@@ -29,6 +29,7 @@ class User implements UserInterface
      * @var Session
      */
     private $session;
+    private $isPageOwner;
 
     /**
      * UserInterface constructor.
@@ -43,7 +44,8 @@ class User implements UserInterface
         $this->schema = $data['schema'];
         $this->db = ZXC::getInstance()->getModule('DB');
         $this->columns = $this->db->getAllColumns($this->schema, $this->table, \PDO::FETCH_ASSOC);
-        $this->session = new Session();
+        $this->session =  Session::getInstance();
+        $this->session->destroy();
     }
 
     /**

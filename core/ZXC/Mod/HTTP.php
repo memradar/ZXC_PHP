@@ -179,4 +179,16 @@ class HTTP extends Factory
     {
         return $this->baseRoute;
     }
+
+    public function existInput()
+    {
+        //TODO HEAD PUT.....
+        if ($this->post) {
+            return $this->post;
+        } elseif ($this->get) {
+            return $this->get;
+        } else {
+            return false;
+        }
+    }
 }

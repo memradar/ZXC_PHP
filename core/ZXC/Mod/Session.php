@@ -9,13 +9,17 @@
 namespace ZXC\Mod;
 
 
+use ZXC\Factory;
 use ZXC\ZXC;
-use ZXC\Interfaces\Module;
 
-class Session implements Module
+class Session extends Factory
 {
     protected $lifeTime;
     private $sess;
+    /**
+     * @var $prefix
+     * $_SESSION[$this->>prefix]
+     */
     private $prefix;
     private $path;
     private $domain;
@@ -27,21 +31,56 @@ class Session implements Module
      */
     public function __construct(array $config = [])
     {
+        $this->init($config);
+    }
+
+    /**
+     * Initialize session
+     * @param array $config
+     */
+    public function init(array $config = [])
+    {
         $zxc = ZXC::getInstance();
         if (!isset($config['time'])) {
             $this->lifeTime = 7200;
+        } else {
+            $this->lifeTime = $config['time'];
         }
         if (!isset($config['path'])) {
             $this->path = '/';
+        } else {
+            $this->path = $config['path'];
         }
         if (!isset($config['domain'])) {
-            $this->domain = $zxc->get('HOST');
+            /**
+             * @var $http HTTP
+             */
+            $http = $zxc->getModule('HTTP');
+            $this->domain = $http ? $http->getHost() : $http;
+        } else {
+            $this->domain = $config['domain'];
         }
         if (!isset($config['name'])) {
             //if session.auto_start is enabled by default you must set session name in php.ini
             $this->name = 'zxc';
+        } else {
+            $this->name = $config['name'];
         }
-        $this->initialize();
+        if (isset($config['prefix']) && is_string($config['prefix'])) {
+            $this->prefix = $config['prefix'];
+        } else {
+            $this->prefix = 'zxc';
+        }
+
+        session_name($this->name);
+        session_set_cookie_params($this->lifeTime, $this->path, $this->domain);
+        $this->start();
+        $this->sess = &$_SESSION;
+        if (!isset($this->sess[$this->prefix])) {
+            $this->sess[$this->prefix] = [];
+            $this->set('id', session_id());
+            $this->set('start', $this->getTime());
+        }
     }
 
     /**
@@ -71,22 +110,6 @@ class Session implements Module
         return false;
     }
 
-    /**
-     * Initialize session
-     */
-    public function initialize()
-    {
-        session_name($this->name);
-        $this->start();
-        session_set_cookie_params($this->lifeTime, $this->path, $this->domain);
-        $this->prefix = 'zxc';
-        $this->sess = &$_SESSION;
-        if (!isset($this->sess[$this->prefix])) {
-            $this->sess = $this->sess[$this->prefix] = [];
-            $this->set('id', session_id());
-            $this->set('start', $this->getTime());
-        }
-    }
 
     /**
      * Start session
@@ -127,5 +150,20 @@ class Session implements Module
     public function getTime()
     {
         return time();
+    }
+
+    public function destroy()
+    {
+        if (isset($_SESSION)) {
+            unset($_SESSION[$this->prefix]);
+            return true;
+        }
+        return false;
+    }
+
+    function reinitialize()
+    {
+        // TODO: Implement reinitialize() method.
+        $this->init();
     }
 }
