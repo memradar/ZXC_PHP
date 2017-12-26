@@ -32,6 +32,9 @@ class DB implements Module
     private $columnsBlocked;
     private $persistent;
     private $transaction;
+    private $conditions = ['<', '>', '<=', '>=', '='];
+    private $lastResult;
+    private $lastInsertId;
 
     /**
      * DB constructor.
@@ -104,6 +107,7 @@ class DB implements Module
 
     public function exec($query, array $params = [], $fetchStyle = \PDO::FETCH_ASSOC)
     {
+        $isInsert = stripos($query, 'insert') === 0;
         $isArray = is_array($query);
         $resultArr = [];
         try {
@@ -132,6 +136,10 @@ class DB implements Module
                 if ($result) {
                     $resultArr = $state->fetchAll($fetchStyle);
                 }
+            }
+            $this->lastResult = $resultArr;
+            if ($isInsert) {
+                $this->lastInsertId = $this->db->lastInsertId();
             }
             return $resultArr;
         } catch (\Exception $e) {
@@ -193,5 +201,59 @@ class DB implements Module
             }
         }
         return $isObject ? (object)$columns : $columns;
+    }
+
+    private function execAction($object = [])
+    {
+        if (!$object || !isset($object['action']) || !isset($object['table']) || !isset($object['where'])
+            || !is_array($object['where']) || count($object['where']) !== 3) {
+            throw new \InvalidArgumentException('Argument is not correct');
+        }
+
+        if (in_array($object['where'][1], $this->conditions)) {
+            $query = "{$object['action']} {$object['fields']} FROM {$object['table']} WHERE  {$object['where'][0]} = ?";
+            return $this->exec($query, [$object['where'][2]]);
+        }
+        return false;
+    }
+
+    public function select($table, $fields = '*', $where = [])
+    {
+        if (!$table || !$where) {
+            throw new \InvalidArgumentException();
+        }
+        return $this->execAction([
+            'action' => 'select',
+            'table' => $table,
+            'fields' => $fields,
+            'where' => $where
+        ]);
+    }
+
+    public function delete($table, $where = [])
+    {
+        if (!$table || !$where) {
+            throw new \InvalidArgumentException();
+        }
+        return $this->execAction([
+            'action' => 'delete',
+            'table' => $table,
+            'where' => $where
+        ]);
+    }
+
+    public function insert($table, $fieldsValues = [])
+    {
+        $mark = implode(",", array_fill(0, count($fieldsValues), '?'));
+        $values = array_values($fieldsValues);
+        $fields = implode(',', array_keys($fieldsValues));
+        $query = "INSERT INTO {$table} ($fields) VALUES ({$mark})";
+        $result = $this->exec($query, $values);
+        return $result;
+    }
+
+    public function update()
+    {
+
     }
 }

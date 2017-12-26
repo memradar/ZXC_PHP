@@ -101,4 +101,10 @@ interface UserInterface
      * @return mixed
      */
     public function isBlocked();
+
+    /**
+     * Check User login status
+     * @return boolean
+     */
+    public function isLoggedIn();
 }

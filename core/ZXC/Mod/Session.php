@@ -10,10 +10,12 @@ namespace ZXC\Mod;
 
 
 use ZXC\Factory;
+use ZXC\Traits\GetSet;
 use ZXC\ZXC;
 
 class Session extends Factory
 {
+    use GetSet;
     protected $lifeTime;
     private $sess;
     /**
@@ -110,6 +112,14 @@ class Session extends Factory
         return false;
     }
 
+    public function delete($key)
+    {
+        if (isset($this->sess)) {
+            unset($this->sess[$this->prefix][$key]);
+            return true;
+        }
+        return false;
+    }
 
     /**
      * Start session

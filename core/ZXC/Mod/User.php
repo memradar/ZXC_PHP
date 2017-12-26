@@ -44,8 +44,15 @@ class User implements UserInterface
         $this->schema = $data['schema'];
         $this->db = ZXC::getInstance()->getModule('DB');
         $this->columns = $this->db->getAllColumns($this->schema, $this->table, \PDO::FETCH_ASSOC);
-        $this->session =  Session::getInstance();
-        $this->session->destroy();
+        $this->session = Session::getInstance();
+
+//        $re = $this->db->select('zxc.users', '*', ['id', '=', 1]);
+//        $re2 = $this->db->delete('zxc.users', ['id', '=', 1]);
+        $re2 = $this->db->insert('zxc.users',
+            ['login' => 'aaaaaaaaa', 'password' => 'dfasdfasdfasdf', 'email' => 'a@MAIL.RU']);
+
+        Token::generate();
+        Token::compare('fasdfasdf');
     }
 
     /**
@@ -60,7 +67,7 @@ class User implements UserInterface
      */
     public function login(array $data)
     {
-        if (!$this->isEmail($data['email']) || !$this->isStrengthPassword($data['email'])) {
+        if (!$this->isEmail($data['email']) || !$this->isStrengthPassword($data['email']) /*|| !Token::compare($data['token'])*/) {
             return false;
         }
         $fields = array_keys($this->columns);
@@ -79,6 +86,11 @@ class User implements UserInterface
 
         }
         $stop = false;
+    }
+
+    public function find()
+    {
+
     }
 
     /**
@@ -171,5 +183,15 @@ class User implements UserInterface
     public function isBlocked()
     {
         // TODO: Implement isBlocked() method.
+    }
+
+    /**
+     * Check User login status
+     * @return boolean
+     */
+    public function isLoggedIn()
+    {
+        // TODO: Implement isLoggedIn() method.
+        return true;
     }
 }
