@@ -256,4 +256,12 @@ class DB implements Module
     {
 
     }
+
+    /**
+     * @return mixed
+     */
+    public function getLastInsertId()
+    {
+        return $this->lastInsertId;
+    }
 }

@@ -39,7 +39,9 @@ interface UserInterface
      * @param $data array
      *      [
      *          'email'=>'',
-     *          'password'=>''
+     *          'login'=>'',
+     *          'password1'=>'',
+     *          'password2'=>''
      *      ]
      * @return mixed
      */
@@ -107,4 +109,10 @@ interface UserInterface
      * @return boolean
      */
     public function isLoggedIn();
+
+    /**
+     * @param $userIdFromDB
+     * @return mixed
+     */
+    public function createWorkingDir($userIdFromDB);
 }

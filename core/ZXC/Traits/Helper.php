@@ -24,9 +24,17 @@ trait Helper
         }
     }
 
+    public function isValidLogin($login = '')
+    {
+        if (!$login) {
+            return false;
+        }
+        return preg_match('/^[A-Za-z][A-Za-z0-9]{3,20}$/', $login);
+    }
+
     public function isValidPassword($sourcePassword)
     {
-
+        //TODO
     }
 
     public function isStrengthPassword($password)
@@ -70,5 +78,15 @@ trait Helper
     public function isIP($ip)
     {
         return filter_var($ip, FILTER_VALIDATE_IP);
+    }
+
+    public function equal($val1, $val2)
+    {
+        return $val1 === $val2;
+    }
+
+    public function createHash()
+    {
+        return md5(time() . rand(0, 150));
     }
 }

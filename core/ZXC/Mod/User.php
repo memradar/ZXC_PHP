@@ -25,6 +25,7 @@ class User implements UserInterface
     private $table;
     private $schema;
     private $columns;
+    protected $dirMode = 0755;
     /**
      * @var Session
      */
@@ -48,8 +49,8 @@ class User implements UserInterface
 
 //        $re = $this->db->select('zxc.users', '*', ['id', '=', 1]);
 //        $re2 = $this->db->delete('zxc.users', ['id', '=', 1]);
-        $re2 = $this->db->insert('zxc.users',
-            ['login' => 'aaaaaaaaa', 'password' => 'dfasdfasdfasdf', 'email' => 'a@MAIL.RU']);
+//        $re2 = $this->db->insert('zxc.users',
+//            ['login' => 'aaaaaaaaa', 'password' => 'dfasdfasdfasdf', 'email' => 'a@MAIL.RU']);
 
         Token::generate();
         Token::compare('fasdfasdf');
@@ -98,13 +99,51 @@ class User implements UserInterface
      * @param $data array
      *      [
      *          'email'=>'',
-     *          'password'=>''
+     *          'login'=>'',
+     *          'password1'=>'',
+     *          'password2'=>''
      *      ]
      * @return mixed
      */
     public function register(array $data)
     {
-        // TODO: Implement register() method.
+        if (!$data ||
+            !$this->equal($data['password1'], $data['password2']) ||
+            !$this->isValidLogin($data['login']) ||
+            !$this->isEmail($data['email'])
+        ) {
+            throw new \InvalidArgumentException();
+        }
+        $activationKeyHash = $this->createHash();
+        $inserted = $this->db->insert('zxc.users',
+            [
+                'login' => $data['login'],
+                'email' => $data['email'],
+                'password' => $this->getPasswordHash($data['password1']),
+                'accountactivationkey' => $activationKeyHash,
+                'joined' => date(DATE_RFC822, time())
+            ]
+        );
+        if (!$inserted) {
+            return false;
+        }
+        $id = $this->db->getLastInsertId();
+        if (!$id) {
+            return false;
+        }
+        if (!$this->createWorkingDir($id)) {
+            $zxc = ZXC::getInstance();
+            /**
+             * @var $logger Logger
+             */
+            $logger = $zxc->getModule('Logger');
+            if (!$logger) {
+                return false;
+            }
+            $logger->critical('!!! ------> User was inserted in DB but can not create working dir',
+                ['data' => $data, 'insertedId' => $id]);
+        }
+        return ['activationKey' => $activationKeyHash, 'uid' => $id];
     }
 
     /**
@@ -192,6 +231,37 @@ class User implements UserInterface
     public function isLoggedIn()
     {
         // TODO: Implement isLoggedIn() method.
+        return true;
+    }
+
+    public function createWorkingDir($userIdFromDB)
+    {
+        //create root dir for users
+        if (!is_dir($_SERVER['DOCUMENT_ROOT'] . '/users/')) {
+            if (!@mkdir($_SERVER['DOCUMENT_ROOT'] . '/users/')) {
+                return false;
+            }
+        }
+        //create root dir for user
+        if (!@mkdir($_SERVER['DOCUMENT_ROOT'] . '/users/user' . $userIdFromDB . '/', $this->dirMode)) {
+            return false;
+        }
+        //dir for user avatars
+        if (!@mkdir($_SERVER['DOCUMENT_ROOT'] . '/users/user' . $userIdFromDB . '/avatar', $this->dirMode)) {
+            return false;
+        }
+        //dir for photos
+        if (!@mkdir($_SERVER['DOCUMENT_ROOT'] . '/users/user' . $userIdFromDB . '/photo', $this->dirMode)) {
+            return false;
+        }
+        //dir for article photos
+        if (!@mkdir($_SERVER['DOCUMENT_ROOT'] . '/users/user' . $userIdFromDB . '/article', $this->dirMode)) {
+            return false;
+        }
+        //dir for tmp files
+        if (!@mkdir($_SERVER['DOCUMENT_ROOT'] . '/users/user' . $userIdFromDB . '/tmp', $this->dirMode)) {
+            return false;
+        }
         return true;
     }
 }
