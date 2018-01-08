@@ -2,27 +2,48 @@
 
 namespace ZXC;
 
-require_once 'Mod/Autoload.php';
+require_once 'ZXCModules/Autoload.php';
 
-use PHPUnit\Runner\Exception;
-use ZXC\Traits\Config;
+use ZXC\Traits\Singleton;
+use ZXC\ZXCModules\HTTP;
+use ZXC\ZXCModules\Config;
+use ZXC\ZXCModules\Logger;
+use ZXC\ZXCModules\Router;
 
-class ZXC extends Factory
+class ZXC /*extends Factory*/
 {
+    use Singleton;
     private $version = '0.0.1-a';
+    /**
+     * @var HTTP
+     */
+    private $http;
+    /**
+     * @var Logger
+     */
+    private $logger;
+    /**
+     * @var Router
+     */
+    private $router;
 
-    use Config;
-
-    protected function __construct(array $config = [])
+    function initialize(array $config = [])
     {
-        if ($config) {
-            $this->setConfig($config);
+        Config::getInstance($config);
+
+        $this->http = HTTP::getInstance();
+
+        $loggerConfig = Config::get('ZXC\Mod/Logger');
+        if ($loggerConfig) {
+            $this->logger = new Logger($loggerConfig);
         }
-    }
 
-    function reinitialize()
-    {
-        // TODO: Implement reinitialize() method.
+        $routerParams = Config::get('ZXC\Mod/Router');
+        if ($routerParams) {
+            $this->router = Router::getInstance($routerParams);
+        } else {
+            throw new \InvalidArgumentException();
+        }
     }
 
     public function go()
@@ -32,10 +53,10 @@ class ZXC extends Factory
          * @var $router Mod\Router
          * @var $routeParams Mod\Route
          */
-        $router = $this->getModule('Router');
-        $http = $this->getModule('HTTP');
-        $routeParams = $router->getCurrentRoutParams(
-            $http->getPath(), $http->getBaseRoute(), $http->getMethod()
+//        $router = $this->getModule('Router');
+//        $http = $this->getModule('HTTP');
+        $routeParams = $this->router->getCurrentRoutParams(
+            $this->http->getPath(), $this->http->getBaseRoute(), $this->http->getMethod()
         );
         if (!$routeParams) {
             $http->sendHeader(404);
@@ -50,17 +71,10 @@ class ZXC extends Factory
 
     public function sysLog($msg = '', $param = [])
     {
-        /**
-         * @var $logger Mod\Logger
-         */
-        $logger = $this->getModule('Logger');
-        if (!$logger) {
+        if ($this->logger->getLevel() !== 'debug') {
             return false;
         }
-        if ($logger->getLevel() !== 'debug') {
-            return false;
-        }
-        $logger->debug($msg, $param);
+        $this->logger->debug($msg, $param);
         return true;
     }
 
