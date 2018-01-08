@@ -9,11 +9,13 @@
 namespace ZXC\Mod;
 
 
+use ZXC\Interfaces\Module;
 use ZXC\Interfaces\UserInterface;
+use ZXC\Traits\Config;
 use ZXC\Traits\Helper;
 use ZXC\ZXC;
 
-class User implements UserInterface
+class User implements UserInterface, Module
 {
     use Helper;
     private $id;
@@ -31,6 +33,7 @@ class User implements UserInterface
      */
     private $session;
     private $isPageOwner;
+    private $isLoggedIn;
 
     /**
      * UserInterface constructor.
@@ -38,22 +41,32 @@ class User implements UserInterface
      */
     public function __construct(array $data = [])
     {
+        /**
+         * @var $zxc ZXC
+         */
+        $zxc = ZXC::getInstance()->getConfigParameters('ZXC\Mod/User/db');
         if (!$data || !isset($data['table']) || !isset($data['schema'])) {
             throw new \InvalidArgumentException();
         }
         $this->table = $data['table'];
         $this->schema = $data['schema'];
-        $this->db = ZXC::getInstance()->getModule('DB');
-        $this->columns = $this->db->getAllColumns($this->schema, $this->table, \PDO::FETCH_ASSOC);
-        $this->session = Session::getInstance();
+//        $this->db = ZXC::getInstance()->getModule('DB');
+//        $this->columns = $this->db->getAllColumns($this->schema, $this->table, \PDO::FETCH_ASSOC);
+//        $this->session = Session::getInstance();
 
 //        $re = $this->db->select('zxc.users', '*', ['id', '=', 1]);
 //        $re2 = $this->db->delete('zxc.users', ['id', '=', 1]);
 //        $re2 = $this->db->insert('zxc.users',
 //            ['login' => 'aaaaaaaaa', 'password' => 'dfasdfasdfasdf', 'email' => 'a@MAIL.RU']);
 
-        Token::generate();
-        Token::compare('fasdfasdf');
+//        Token::generate();
+//        Token::compare('fasdfasdf');
+    }
+
+    public function initialize()
+    {
+        $stop = false;
+        // TODO: Implement initialize() method.
     }
 
     /**
@@ -68,18 +81,11 @@ class User implements UserInterface
      */
     public function login(array $data)
     {
+        //todo доделать логин польщователя и запоминание если выбрали галочку запомнить и так же генерировать токен для пользователя
         if (!$this->isEmail($data['email']) || !$this->isStrengthPassword($data['email']) /*|| !Token::compare($data['token'])*/) {
             return false;
         }
-        $fields = array_keys($this->columns);
-        $fields = implode(',', $fields);
-        $user = $this->db->exec(
-            "SELECT {$fields} FROM {$this->schema}.{$this->table} WHERE email = ? AND password = ?",
-            [$data['email'], $data['password']]
-        );
-        if (!$user || count($user) > 1) {
-            return false;
-        }
+        $this->find();
         if (isset($data['saveSession']) && $data['saveSession'] === true) {
             //TODO
             $stop = false;
@@ -89,9 +95,18 @@ class User implements UserInterface
         $stop = false;
     }
 
-    public function find()
+    public function find(array $data)
     {
-
+        $fields = array_keys($this->columns);
+        $fields = implode(',', $fields);
+        $user = $this->db->exec(
+            "SELECT {$fields} FROM {$this->schema}.{$this->table} WHERE email = ? AND password = ?",
+            [$data['email'], $data['password']]
+        );
+        if (!$user || count($user) > 1) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -107,6 +122,7 @@ class User implements UserInterface
      */
     public function register(array $data)
     {
+        //TODO before register app must send request for generate token for app and user
         if (!$data ||
             !$this->equal($data['password1'], $data['password2']) ||
             !$this->isValidLogin($data['login']) ||
@@ -237,29 +253,29 @@ class User implements UserInterface
     public function createWorkingDir($userIdFromDB)
     {
         //create root dir for users
-        if (!is_dir($_SERVER['DOCUMENT_ROOT'] . '/users/')) {
-            if (!@mkdir($_SERVER['DOCUMENT_ROOT'] . '/users/')) {
+        if (!is_dir(APP_ROOT . '/users/')) {
+            if (!@mkdir(APP_ROOT . '/users/')) {
                 return false;
             }
         }
         //create root dir for user
-        if (!@mkdir($_SERVER['DOCUMENT_ROOT'] . '/users/user' . $userIdFromDB . '/', $this->dirMode)) {
+        if (!@mkdir(APP_ROOT . '/users/user' . $userIdFromDB . '/', $this->dirMode)) {
             return false;
         }
         //dir for user avatars
-        if (!@mkdir($_SERVER['DOCUMENT_ROOT'] . '/users/user' . $userIdFromDB . '/avatar', $this->dirMode)) {
+        if (!@mkdir(APP_ROOT . '/users/user' . $userIdFromDB . '/avatar', $this->dirMode)) {
             return false;
         }
         //dir for photos
-        if (!@mkdir($_SERVER['DOCUMENT_ROOT'] . '/users/user' . $userIdFromDB . '/photo', $this->dirMode)) {
+        if (!@mkdir(APP_ROOT . '/users/user' . $userIdFromDB . '/photo', $this->dirMode)) {
             return false;
         }
         //dir for article photos
-        if (!@mkdir($_SERVER['DOCUMENT_ROOT'] . '/users/user' . $userIdFromDB . '/article', $this->dirMode)) {
+        if (!@mkdir(APP_ROOT . '/users/user' . $userIdFromDB . '/article', $this->dirMode)) {
             return false;
         }
         //dir for tmp files
-        if (!@mkdir($_SERVER['DOCUMENT_ROOT'] . '/users/user' . $userIdFromDB . '/tmp', $this->dirMode)) {
+        if (!@mkdir(APP_ROOT . '/users/user' . $userIdFromDB . '/tmp', $this->dirMode)) {
             return false;
         }
         return true;

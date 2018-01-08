@@ -25,11 +25,6 @@ class ZXC extends Factory
         // TODO: Implement reinitialize() method.
     }
 
-    public function get($key)
-    {
-        return isset($this->$key) ? $this->$key : null;
-    }
-
     public function go()
     {
         /**
