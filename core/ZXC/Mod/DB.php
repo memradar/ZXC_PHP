@@ -74,7 +74,7 @@ class DB implements Module
                 \PDO::ERRMODE_EXCEPTION);
         } catch (\PDOException $e) {
             $zxc = ZXC::getInstance();
-            $zxc->sysLog($e->getMessage());
+//            $zxc->sysLog($e->getMessage());
             echo $e;
         }
     }

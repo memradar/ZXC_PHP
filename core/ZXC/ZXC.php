@@ -10,7 +10,7 @@ use ZXC\ZXCModules\Config;
 use ZXC\ZXCModules\Logger;
 use ZXC\ZXCModules\Router;
 
-class ZXC /*extends Factory*/
+class ZXC
 {
     use Singleton;
     private $version = '0.0.1-a';
@@ -49,17 +49,13 @@ class ZXC /*extends Factory*/
     public function go()
     {
         /**
-         * @var $http Mod\HTTP
-         * @var $router Mod\Router
-         * @var $routeParams Mod\Route
+         * @var $routeParams ZXCModules\Route
          */
-//        $router = $this->getModule('Router');
-//        $http = $this->getModule('HTTP');
         $routeParams = $this->router->getCurrentRoutParams(
             $this->http->getPath(), $this->http->getBaseRoute(), $this->http->getMethod()
         );
         if (!$routeParams) {
-            $http->sendHeader(404);
+            $this->http->sendHeader(404);
             return false;
         }
         ob_start();
@@ -69,7 +65,7 @@ class ZXC /*extends Factory*/
         return true;
     }
 
-    public function sysLog($msg = '', $param = [])
+    public function writeLog($msg = '', $param = []): bool
     {
         if ($this->logger->getLevel() !== 'debug') {
             return false;

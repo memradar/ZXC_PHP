@@ -38,7 +38,7 @@ class Route
                 'Route is not valid! Must be like this \'POST|/test/:route/|Class:method\''
             );
         }
-        $zxc->sysLog(__FUNCTION__ . " in " . __FILE__ . " at " . __LINE__, $params);
+//        $zxc->sysLog(__FUNCTION__ . " in " . __FILE__ . " at " . __LINE__, $params);
         foreach ($params as $item => $val) {
             $this->$item = $val;
         }
@@ -185,8 +185,8 @@ class Route
         if ($this->class) {
             if (!class_exists($this->class)) {
                 $zxc = ZXC::getInstance();
-                $zxc->sysLog($this->class . ' is not defined. Can not execute route with params',
-                    $this->params ? $this->params : []);
+//                $zxc->sysLog($this->class . ' is not defined. Can not execute route with params',
+//                    $this->params ? $this->params : []);
             }
             if (is_subclass_of($this->class, 'ZXC\Factory', true)) {
                 $userClass = call_user_func(
