@@ -12,6 +12,7 @@ class Router extends Factory
     public function __construct()
     {
         $params = func_get_args();
+        //TODO use Trait for Singleton
         $this->reinitialize($params ? $params[0] : null);
     }
 
