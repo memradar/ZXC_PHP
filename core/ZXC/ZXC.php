@@ -29,7 +29,7 @@ class ZXC
 
     function initialize(array $config = [])
     {
-        Config::getInstance($config);
+        Config::getInstance()->initialize($config);
 
         $this->http = HTTP::getInstance();
 

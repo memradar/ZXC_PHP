@@ -8,10 +8,12 @@
 
 namespace ZXC\ZXCModules;
 
-use ZXC\Factory;
+use ZXC\Traits\Singleton;
 
-class HTTP extends Factory
+class HTTP
 {
+    use Singleton;
+
     //TODO PSR-7
     /**
      * https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
@@ -93,7 +95,7 @@ class HTTP extends Factory
     private $baseRoute;
 
 
-    public function __construct()
+    private function __construct()
     {
         $this->server = &$_SERVER;
         $this->method = &$this->server['REQUEST_METHOD'];
@@ -114,11 +116,6 @@ class HTTP extends Factory
         if ($lastSlash === '/') {
             $this->path = rtrim($this->path, '/');
         }
-    }
-
-    function reinitialize()
-    {
-        // TODO: Implement reinitialize() method.
     }
 
     public function sendHeader($status = 404)

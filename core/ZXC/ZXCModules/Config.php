@@ -8,14 +8,14 @@
 
 namespace ZXC\ZXCModules;
 
+use ZXC\Traits\Singleton;
 
-use ZXC\Factory;
-
-class Config extends Factory
+class Config
 {
+    use Singleton;
     public static $config;
 
-    public function __construct(array $config = [])
+    public function initialize(array $config = [])
     {
         self::$config = $config;
     }
@@ -35,10 +35,5 @@ class Config extends Factory
             }
         }
         return $configParameters;
-    }
-
-    function reinitialize(array $config = [])
-    {
-        self::$config = $config;
     }
 }
