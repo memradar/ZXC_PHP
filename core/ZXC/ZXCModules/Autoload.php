@@ -2,20 +2,25 @@
 
 namespace ZXC\ZXCModules;
 
-require_once ZXC_ROOT . DIRECTORY_SEPARATOR . 'ZXC' . DIRECTORY_SEPARATOR
-    . 'Factory.php';
+require_once ZXC_ROOT . DIRECTORY_SEPARATOR . 'ZXC' . DIRECTORY_SEPARATOR . 'Traits' . DIRECTORY_SEPARATOR
+    . 'Singleton.php';
 require_once ZXC_ROOT . DIRECTORY_SEPARATOR . 'ZXC' . DIRECTORY_SEPARATOR
     . 'Traits' . DIRECTORY_SEPARATOR . 'Helper.php';
 
-use ZXC\Factory;
 use ZXC\Traits\Helper;
+use ZXC\Traits\Singleton;
 
-class Autoload extends Factory
+class Autoload
 {
     use Helper;
+    use Singleton;
     private static $autoloadDirectories = [];
 
-    protected function __construct()
+    /**
+     * Initialize autoload directories
+     * @param array $config ['dir'=>true]
+     */
+    function initialize(array $config = [])
     {
         $params = func_get_args();
         foreach ($params as $item) {
@@ -23,29 +28,35 @@ class Autoload extends Factory
         }
     }
 
-    function reinitialize(array $config = [])
-    {
-        $params = func_get_args();
-        foreach ($params as $item) {
-            $this->setAutoloadDirectories($item);
-        }
-    }
-
+    /**
+     * Returns all registered directories
+     * @return array
+     */
     public static function getAutoloadDirectories()
     {
         return self::$autoloadDirectories;
     }
 
+    /**
+     * @param array $dir
+     * @return bool
+     */
     public function setAutoloadDirectories(array $dir)
     {
         if (!$this->isAssoc($dir)) {
-            return null;
+            return false;
         }
         self::$autoloadDirectories = array_merge(
             self::$autoloadDirectories, $dir
         );
+        return true;
     }
 
+    /**
+     * Disable directory for autoload
+     * @param string $dir
+     * @return bool
+     */
     public function disableAutoloadDirectories($dir)
     {
         if (isset(self::$autoloadDirectories[$dir])) {
@@ -57,6 +68,11 @@ class Autoload extends Factory
         return false;
     }
 
+    /**
+     * Enable directory for autoload
+     * @param string $dir
+     * @return bool
+     */
     public function enableAutoloadDirectories($dir)
     {
         if (isset(self::$autoloadDirectories[$dir])) {
@@ -68,6 +84,11 @@ class Autoload extends Factory
         return false;
     }
 
+    /**
+     * Remove directories from autoload
+     * @param string $dir
+     * @return bool
+     */
     public function removeAutoloadDirectories($dir)
     {
         if (isset(self::$autoloadDirectories[$dir])) {
@@ -79,6 +100,11 @@ class Autoload extends Factory
         return false;
     }
 
+    /**
+     * Require file
+     * @param string $className
+     * @return bool
+     */
     public static function autoload($className)
     {
         $file = false;
@@ -111,5 +137,6 @@ class Autoload extends Factory
 }
 
 spl_autoload_register('ZXC\ZXCModules\Autoload::autoload');
-
-return Autoload::getInstance(['' => true]);
+$autoloader = Autoload::getInstance();
+$autoloader->initialize(['' => true]);
+return $autoloader;
