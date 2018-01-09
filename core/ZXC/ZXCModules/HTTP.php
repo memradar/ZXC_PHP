@@ -8,7 +8,7 @@
 
 namespace ZXC\ZXCModules;
 
-use ZXC\Traits\Singleton;
+use ZXC\Patterns\Singleton;
 
 class HTTP
 {

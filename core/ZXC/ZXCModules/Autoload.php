@@ -2,13 +2,13 @@
 
 namespace ZXC\ZXCModules;
 
-require_once ZXC_ROOT . DIRECTORY_SEPARATOR . 'ZXC' . DIRECTORY_SEPARATOR . 'Traits' . DIRECTORY_SEPARATOR
+require_once ZXC_ROOT . DIRECTORY_SEPARATOR . 'ZXC' . DIRECTORY_SEPARATOR . 'Patterns' . DIRECTORY_SEPARATOR
     . 'Singleton.php';
 require_once ZXC_ROOT . DIRECTORY_SEPARATOR . 'ZXC' . DIRECTORY_SEPARATOR
     . 'Traits' . DIRECTORY_SEPARATOR . 'Helper.php';
 
 use ZXC\Traits\Helper;
-use ZXC\Traits\Singleton;
+use ZXC\Patterns\Singleton;
 
 class Autoload
 {
@@ -138,5 +138,5 @@ class Autoload
 
 spl_autoload_register('ZXC\ZXCModules\Autoload::autoload');
 $autoloader = Autoload::getInstance();
-$autoloader->initialize(['' => true]);
+$autoloader->initialize(['' => true, '../../hs' => true]);
 return $autoloader;

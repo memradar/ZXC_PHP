@@ -6,20 +6,19 @@
  * Time: 16:59
  */
 
-namespace ZXC\Mod;
+namespace ZXC\Classes;
 
-use ZXC\Factory;
-use ZXC\Traits\Singleton;
+use ZXC\Patterns\Multiton;
 use ZXC\ZXC;
-use ZXC\Interfaces\Module;
 
 /**
  * Class DB
  * @package ZXC\Mod
  * @property db PDO
  */
-class DB implements Module
+class DB
 {
+    use Multiton;
     /**
      * @var $db \PDO
      */
@@ -37,12 +36,10 @@ class DB implements Module
     private $lastInsertId;
 
     /**
-     * DB constructor.
-     *
      * @param array $params
      * @throws \Exception
      */
-    public function __construct(array $params = []/*, $dsn, $user, $password, $persistent = false*/)
+    public function initialize(array $params = [])
     {
         if (!isset($params['db']) || !isset($params['dbtype']) ||
             !isset($params['host']) || !isset($params['port']) ||
@@ -62,10 +59,7 @@ class DB implements Module
         $this->name = $params['name'];
         $this->pass = $params['pass'];
         $this->columnsBlocked = isset($params['columns']) ? $params['columns'] : null;
-    }
 
-    public function initialize()
-    {
         try {
             $this->db = new \PDO($this->dns, $this->name, $this->pass,
                 [\PDO::ATTR_PERSISTENT => $this->persistent]);
@@ -73,9 +67,7 @@ class DB implements Module
             $this->db->setAttribute(\PDO::ATTR_ERRMODE,
                 \PDO::ERRMODE_EXCEPTION);
         } catch (\PDOException $e) {
-            $zxc = ZXC::getInstance();
-//            $zxc->sysLog($e->getMessage());
-            echo $e;
+            //TODO Exception
         }
     }
 

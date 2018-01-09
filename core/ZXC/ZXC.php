@@ -4,7 +4,7 @@ namespace ZXC;
 
 require_once 'ZXCModules/Autoload.php';
 
-use ZXC\Traits\Singleton;
+use ZXC\Patterns\Singleton;
 use ZXC\ZXCModules\HTTP;
 use ZXC\ZXCModules\Config;
 use ZXC\ZXCModules\Logger;
