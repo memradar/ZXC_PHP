@@ -40,7 +40,8 @@ class ZXC
 
         $routerParams = Config::get('ZXC\Mod/Router');
         if ($routerParams) {
-            $this->router = Router::getInstance($routerParams);
+            $this->router = Router::getInstance();
+            $this->router->initialize($routerParams);
         } else {
             throw new \InvalidArgumentException();
         }

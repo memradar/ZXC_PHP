@@ -2,44 +2,46 @@
 
 namespace ZXC\ZXCModules;
 
-use ZXC\Factory;
+use ZXC\Traits\Singleton;
 
-class Router extends Factory
+class Router
 {
+    use Singleton;
     private $routes = [];
     private $routeTypes = ['POST' => true, 'GET' => true];
 
-    public function __construct()
-    {
-        $params = func_get_args();
-        //TODO use Trait for Singleton
-        $this->reinitialize($params ? $params[0] : null);
-    }
-
-    public function reinitialize()
+    /**
+     * Initialize router
+     * @param array $config [
+     *      [
+     *          'route' => 'GET|/api|Class:method',
+     *          'call' => function ($zxc) { },
+     *          'before' => 'Class:before',
+     *          'after' => 'Class:after'
+     *      ]
+     *  ]
+     */
+    public function initialize(array $config = [])
     {
         $params = func_get_args();
         if (!$params) {
             throw new \InvalidArgumentException('Undefined $params');
         }
-        foreach ($params as $item) {
-            $this->registerRoutes($item);
-        }
-    }
-
-    public function registerRoutes(array $routes = [])
-    {
-        if (!$routes) {
-            throw new \InvalidArgumentException('Undefined $routes');
-        }
-        foreach ($routes as $route) {
-            if (isset($route['route'])) {
-                $this->parseRoute($route);
+        foreach ($params as $routes) {
+            foreach ($routes as $route) {
+                if (isset($route['route'])) {
+                    $this->parseRoute($route);
+                }
             }
         }
     }
 
-    public function parseHooks($params = '')
+    /**
+     * Parse hooks
+     * @param string $params 'Class:before from route params ['before' => 'Class:before']
+     * @return array|bool
+     */
+    private function parseHooks($params = '')
     {
         if (!$params) {
             throw new \InvalidArgumentException('Undefined $params');
@@ -54,6 +56,10 @@ class Router extends Factory
         ];
     }
 
+    /**
+     * Set parsed route in $this->routes type(GET,POST)
+     * @param Route $parsedRoute
+     */
     private function setRoute(Route $parsedRoute)
     {
         $parsedRouteType = $parsedRoute->getType();
@@ -62,9 +68,20 @@ class Router extends Factory
         }
     }
 
-    private function parseRoute($route)
+    /**
+     * Parse route from config
+     * @param array $route
+     *  [
+     *      'route' => 'GET|/api|Class:method',
+     *      'call' => function ($zxc) { },
+     *      'before' => 'Class:before',
+     *      'after' => 'Class:after'
+     *  ]
+     * @return bool
+     */
+
+    private function parseRoute(array $route)
     {
-        //TODO regexp
         $params = explode('|', $route['route']);
         if (!$params || count($params) < 2) {
             throw new \InvalidArgumentException('Undefined $params');
@@ -135,6 +152,11 @@ class Router extends Factory
         return true;
     }
 
+    /**
+     * Disable router type
+     * @param string $type (GET,POST)
+     * @return bool
+     */
     public function disableRouterType($type)
     {
         $type = strtoupper($type);
@@ -147,6 +169,13 @@ class Router extends Factory
         return false;
     }
 
+    /**
+     * Get router parameters for URI
+     * @param string $uri http->getPath
+     * @param string $base http->getBaseRoute
+     * @param string $method http->getMethod
+     * @return bool|Route
+     */
     public function getCurrentRoutParams($uri, $base, $method)
     {
         if (!$uri || !$base || !$method) {
@@ -183,7 +212,7 @@ class Router extends Factory
             }
         }
 
-        return null;
+        return false;
     }
 
     /**
@@ -225,6 +254,7 @@ class Router extends Factory
     }
 
     /**
+     * Returns all registered routes
      * @return array
      */
     public function getRoutes(): array
@@ -233,6 +263,7 @@ class Router extends Factory
     }
 
     /**
+     * Returns all registered route types
      * @return array
      */
     public function getRouteTypes(): array
