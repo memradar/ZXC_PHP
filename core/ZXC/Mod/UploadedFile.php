@@ -1,6 +1,6 @@
 <?php
 
-namespace ZXC\Mod;
+namespace ZXC\Classes;
 
 
 use Psr\Http\Message\StreamInterface;
@@ -16,10 +16,6 @@ class UploadedFile implements UploadedFileInterface
      * @var $stream Stream
      */
     private $stream;
-    /**
-     * @var string
-     */
-    private $name;
     /**
      * @var string
      */

@@ -17,5 +17,9 @@ interface Module
      */
     public function __construct(array $config = []);
 
+    /**
+     * Initialize all needed instances
+     * @return mixed
+     */
     public function initialize();
 }

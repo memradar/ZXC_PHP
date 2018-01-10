@@ -82,4 +82,28 @@ class ZXC
     {
         return $this->version;
     }
+
+    /**
+     * @return HTTP
+     */
+    public function getHttp(): HTTP
+    {
+        return $this->http;
+    }
+
+    /**
+     * @return Logger
+     */
+    public function getLogger(): Logger
+    {
+        return $this->logger;
+    }
+
+    /**
+     * @return Router
+     */
+    public function getRouter(): Router
+    {
+        return $this->router;
+    }
 }

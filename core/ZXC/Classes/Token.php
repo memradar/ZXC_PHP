@@ -6,7 +6,7 @@
  * Time: 00:26
  */
 
-namespace ZXC\Mod;
+namespace ZXC\Classes;
 
 
 class Token

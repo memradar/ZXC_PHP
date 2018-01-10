@@ -6,11 +6,10 @@
  * Time: 22:32
  */
 
-namespace ZXC\Mod;
+namespace ZXC\Classes;
 
 
 use Psr\Http\Message\StreamInterface;
-use ZXC\Traits\Helper;
 
 class Stream implements StreamInterface
 {
@@ -18,7 +17,7 @@ class Stream implements StreamInterface
     private $resource;
     private $stream;
     private $meta;
-    use Helper;
+    const MODE_READ_WRITE_RESET = 'wb+';
     /**
      * @var array
      * @link from https://github.com/guzzle/streams/blob/master/src/Stream.php
@@ -83,7 +82,7 @@ class Stream implements StreamInterface
         if (!$stream) {
             throw new \InvalidArgumentException('Invalid argument $stream');
         }
-        if ($this->isWindows() && strpos($mode, 'b') === false) {
+        if (\ZXC\Classes\Helper::isWindows() && strpos($mode, 'b') === false) {
             $mode = $mode . 'b';
         }
 

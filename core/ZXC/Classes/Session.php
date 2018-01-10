@@ -1,21 +1,15 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: nikolaygiman
- * Date: 17/11/2017
- * Time: 00:04
- */
 
-namespace ZXC\Mod;
+namespace ZXC\Classes;
 
-
-use ZXC\Factory;
-use ZXC\Traits\GetSet;
 use ZXC\ZXC;
+use ZXC\ZXCModules\HTTP;
+use ZXC\Patterns\Singleton;
 
-class Session extends Factory
+
+class Session
 {
-    use GetSet;
+    use Singleton;
     protected $lifeTime;
     private $sess;
     /**
@@ -57,7 +51,7 @@ class Session extends Factory
             /**
              * @var $http HTTP
              */
-            $http = $zxc->getModule('HTTP');
+            $http = $zxc->getHttp();
             $this->domain = $http ? $http->getHost() : $http;
         } else {
             $this->domain = $config['domain'];
@@ -171,9 +165,4 @@ class Session extends Factory
         return false;
     }
 
-    function reinitialize()
-    {
-        // TODO: Implement reinitialize() method.
-        $this->init();
-    }
 }

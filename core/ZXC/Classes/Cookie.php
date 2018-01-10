@@ -6,7 +6,7 @@
  * Time: 18:33
  */
 
-namespace ZXC\Mod;
+namespace ZXC\Classes;
 
 
 class Cookie

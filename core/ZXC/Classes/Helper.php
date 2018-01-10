@@ -1,12 +1,21 @@
 <?php
+/**
+ * Created by PhpStorm.
+ * User: nikolaygiman
+ * Date: 10/01/2018
+ * Time: 22:01
+ */
 
-namespace ZXC\Traits;
+namespace ZXC\Classes;
 
 
-trait Helper
+use ZXC\Patterns\Singleton;
+
+class Helper
 {
-    //TODO regex for check login email.and password
-    public function isAssoc($arr)
+    use Singleton;
+
+    public static function isAssoc($arr)
     {
         if (array() === $arr) {
             return false;
@@ -15,7 +24,7 @@ trait Helper
         return array_keys($arr) !== range(0, count($arr) - 1);
     }
 
-    public function isWindows()
+    public static function isWindows()
     {
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
             return true;
@@ -24,7 +33,7 @@ trait Helper
         }
     }
 
-    public function isValidLogin($login = '')
+    public static function isValidLogin($login = '')
     {
         if (!$login) {
             return false;
@@ -32,18 +41,18 @@ trait Helper
         return preg_match('/^[A-Za-z][A-Za-z0-9]{3,20}$/', $login);
     }
 
-    public function isValidPassword($sourcePassword)
+    public static function isValidPassword($sourcePassword)
     {
         //TODO
     }
 
-    public function isStrengthPassword($password)
+    public static function isStrengthPassword($password)
     {
         //TODO
         return true;
     }
 
-    public function isEmail($email = null, $mx = true)
+    public static function isEmail($email = null, $mx = true)
     {
         if (!$email) {
             return false;
@@ -58,13 +67,13 @@ trait Helper
 
     }
 
-    public function getCleanEmail($email)
+    public static function getCleanEmail($email)
     {
         $result = strtolower(filter_var($email, FILTER_SANITIZE_EMAIL));
         return $result;
     }
 
-    public function getPasswordHash($password = null, $cost = 10)
+    public static function getPasswordHash($password = null, $cost = 10)
     {
         if ($password === null) {
             throw new \InvalidArgumentException('Password is not defined');
@@ -75,17 +84,17 @@ trait Helper
         return password_hash($password, PASSWORD_BCRYPT, $options);
     }
 
-    public function isIP($ip)
+    public static function isIP($ip)
     {
         return filter_var($ip, FILTER_VALIDATE_IP);
     }
 
-    public function equal($val1, $val2)
+    public static function equal($val1, $val2)
     {
         return $val1 === $val2;
     }
 
-    public function createHash()
+    public static function createHash()
     {
         return md5(time() . rand(0, 150));
     }
