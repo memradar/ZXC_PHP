@@ -27,7 +27,6 @@ trait Multiton
 
     static public function getInstance(string $instanceName)
     {
-        $stop= false;
         return
             !isset(self::$instance[$instanceName])
                 ? self::$instance[$instanceName] = new static()//new self()

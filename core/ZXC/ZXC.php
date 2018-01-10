@@ -33,12 +33,12 @@ class ZXC
 
         $this->http = HTTP::getInstance();
 
-        $loggerConfig = Config::get('ZXC\Mod/Logger');
+        $loggerConfig = Config::get('ZXC/Logger');
         if ($loggerConfig) {
             $this->logger = new Logger($loggerConfig);
         }
 
-        $routerParams = Config::get('ZXC\Mod/Router');
+        $routerParams = Config::get('ZXC/Router');
         if ($routerParams) {
             $this->router = Router::getInstance();
             $this->router->initialize($routerParams);

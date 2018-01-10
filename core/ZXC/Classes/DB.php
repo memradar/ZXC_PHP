@@ -8,9 +8,6 @@
 
 namespace ZXC\Classes;
 
-use ZXC\Patterns\Multiton;
-use ZXC\ZXC;
-
 /**
  * Class DB
  * @package ZXC\Mod
@@ -18,7 +15,6 @@ use ZXC\ZXC;
  */
 class DB
 {
-    use Multiton;
     /**
      * @var $db \PDO
      */
@@ -36,6 +32,17 @@ class DB
     private $lastInsertId;
 
     /**
+     * DB constructor.
+     * @param array $params
+     * @throws \Exception
+     */
+    public function __construct(array $params = [])
+    {
+        $this->initialize($params);
+    }
+
+    /**
+     * Initialize PDO instance
      * @param array $params
      * @throws \Exception
      */
@@ -82,6 +89,7 @@ class DB
     }
 
     /**
+     * Get PDO instance
      * @return null|\PDO
      */
     public function getDb()
@@ -90,6 +98,7 @@ class DB
     }
 
     /**
+     * Get DB type
      * @return mixed|null
      */
     public function getDbType()
@@ -97,6 +106,13 @@ class DB
         return $this->dbType;
     }
 
+    /**
+     * Execute query
+     * @param string $query
+     * @param array $params
+     * @param int $fetchStyle
+     * @return array|bool
+     */
     public function exec($query, array $params = [], $fetchStyle = \PDO::FETCH_ASSOC)
     {
         $isInsert = stripos($query, 'insert') === 0;
@@ -165,6 +181,13 @@ class DB
         }
     }
 
+    /**
+     * Get all columns fom table
+     * @param $tableSchema
+     * @param $tableName
+     * @param int $fetchStyle
+     * @return array|object
+     */
     public function getAllColumns($tableSchema, $tableName, $fetchStyle = \PDO::FETCH_ASSOC)
     {
         $columns = [];
@@ -195,6 +218,11 @@ class DB
         return $isObject ? (object)$columns : $columns;
     }
 
+    /**
+     * Execute action
+     * @param array $object
+     * @return array|bool
+     */
     private function execAction($object = [])
     {
         if (!$object || !isset($object['action']) || !isset($object['table']) || !isset($object['where'])
@@ -209,6 +237,13 @@ class DB
         return false;
     }
 
+    /**
+     * Select records from table
+     * @param string $table = schema.table || table
+     * @param string $fields
+     * @param array $where
+     * @return array|bool
+     */
     public function select($table, $fields = '*', $where = [])
     {
         if (!$table || !$where) {
@@ -222,6 +257,12 @@ class DB
         ]);
     }
 
+    /**
+     * Delete record from table
+     * @param string $table = schema.table || table
+     * @param array $where = ['id', '=', 1]
+     * @return array|bool
+     */
     public function delete($table, $where = [])
     {
         if (!$table || !$where) {
@@ -229,11 +270,21 @@ class DB
         }
         return $this->execAction([
             'action' => 'delete',
+            'fields' => '',
             'table' => $table,
             'where' => $where
         ]);
     }
 
+    /**
+     * Insert records into table
+     * @param string $table = schema.table || table
+     * @param array $fieldsValues = [
+     *      'login' => 'login',
+     *      'email' => 'email'
+     * ]
+     * @return array|bool
+     */
     public function insert($table, $fieldsValues = [])
     {
         $mark = implode(",", array_fill(0, count($fieldsValues), '?'));
@@ -250,6 +301,7 @@ class DB
     }
 
     /**
+     * Get last inserted id
      * @return mixed
      */
     public function getLastInsertId()
