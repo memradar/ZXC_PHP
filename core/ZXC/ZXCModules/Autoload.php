@@ -5,14 +5,14 @@ namespace ZXC\ZXCModules;
 require_once ZXC_ROOT . DIRECTORY_SEPARATOR . 'ZXC' . DIRECTORY_SEPARATOR . 'Patterns' . DIRECTORY_SEPARATOR
     . 'Singleton.php';
 require_once ZXC_ROOT . DIRECTORY_SEPARATOR . 'ZXC' . DIRECTORY_SEPARATOR
-    . 'Traits' . DIRECTORY_SEPARATOR . 'Helper.php';
+    . 'Classes' . DIRECTORY_SEPARATOR . 'Helper.php';
 
-use ZXC\Traits\Helper;
+
+use ZXC\Classes\Helper;
 use ZXC\Patterns\Singleton;
 
 class Autoload
 {
-    use Helper;
     use Singleton;
     private static $autoloadDirectories = [];
 
@@ -43,7 +43,7 @@ class Autoload
      */
     public function setAutoloadDirectories(array $dir)
     {
-        if (!$this->isAssoc($dir)) {
+        if (!Helper::isAssoc($dir)) {
             return false;
         }
         self::$autoloadDirectories = array_merge(

@@ -177,13 +177,13 @@ class HTTP
         return $this->baseRoute;
     }
 
-    public function existInput()
+    public function existInput($name)
     {
         //TODO HEAD PUT.....
-        if ($this->post) {
-            return $this->post;
-        } elseif ($this->get) {
-            return $this->get;
+        if (isset($this->post[$name])) {
+            return $this->post[$name];
+        } elseif (isset($this->get[$name])) {
+            return $this->get[$name];
         } else {
             return false;
         }

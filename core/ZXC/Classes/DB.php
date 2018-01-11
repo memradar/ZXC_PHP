@@ -30,6 +30,7 @@ class DB
     private $conditions = ['<', '>', '<=', '>=', '='];
     private $lastResult;
     private $lastInsertId;
+    private $fetchStyle = \PDO::FETCH_ASSOC;
 
     /**
      * DB constructor.
@@ -110,10 +111,9 @@ class DB
      * Execute query
      * @param string $query
      * @param array $params
-     * @param int $fetchStyle
      * @return array|bool
      */
-    public function exec($query, array $params = [], $fetchStyle = \PDO::FETCH_ASSOC)
+    public function exec($query, array $params = [])
     {
         $isInsert = stripos($query, 'insert') === 0;
         $isArray = is_array($query);
@@ -127,9 +127,9 @@ class DB
                         $result = $state->execute($value['params']);
                         if ($result) {
                             if (!isset($resultArr[$fieldName])) {
-                                $resultArr[$fieldName] = $state->fetchAll($fetchStyle);
+                                $resultArr[$fieldName] = $state->fetchAll($this->fetchStyle);
                             } else {
-                                $resultArr[] = $state->fetchAll($fetchStyle);
+                                $resultArr[] = $state->fetchAll($this->fetchStyle);
                             }
                         }
                         break;
@@ -142,7 +142,7 @@ class DB
                 $result = $state->execute($params);
                 $this->commit();
                 if ($result) {
-                    $resultArr = $state->fetchAll($fetchStyle);
+                    $resultArr = $state->fetchAll($this->fetchStyle);
                 }
             }
             $this->lastResult = $resultArr;
@@ -185,14 +185,13 @@ class DB
      * Get all columns fom table
      * @param $tableSchema
      * @param $tableName
-     * @param int $fetchStyle
      * @return array|object
      */
-    public function getAllColumns($tableSchema, $tableName, $fetchStyle = \PDO::FETCH_ASSOC)
+    public function getAllColumns($tableSchema, $tableName)
     {
         $columns = [];
         $query = 'SELECT * FROM information_schema.columns WHERE table_schema = ? AND table_name = ?';
-        $result = $this->exec($query, [$tableSchema, $tableName], $fetchStyle);
+        $result = $this->exec($query, [$tableSchema, $tableName]);
         if (!$result) {
             return $columns;
         }
@@ -307,5 +306,21 @@ class DB
     public function getLastInsertId()
     {
         return $this->lastInsertId;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFetchStyle()
+    {
+        return $this->fetchStyle;
+    }
+
+    /**
+     * @param mixed $fetchStyle
+     */
+    public function setFetchStyle($fetchStyle): void
+    {
+        $this->fetchStyle = $fetchStyle;
     }
 }
