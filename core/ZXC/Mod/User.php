@@ -1,23 +1,13 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: nikolaygiman
- * Date: 23/12/2017
- * Time: 23:10
- */
 
 namespace ZXC\Mod;
 
-
+use ZXC\ZXC;
 use ZXC\Interfaces\Module;
 use ZXC\Interfaces\UserInterface;
-use ZXC\Traits\Config;
-use ZXC\Traits\Helper;
-use ZXC\ZXC;
 
 class User implements UserInterface, Module
 {
-    use Helper;
     private $id;
     /**
      * @var DB

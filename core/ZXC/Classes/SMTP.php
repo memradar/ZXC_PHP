@@ -6,7 +6,7 @@
  * Time: 00:58
  */
 
-namespace ZXC\Mod;
+namespace ZXC\Classes;
 
 
 class SMTP

@@ -1,15 +1,8 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: nikolaygiman
- * Date: 13/11/2017
- * Time: 00:00
- */
 
 namespace ZXC\Interfaces;
 
-
-use ZXC\Mod\Session;
+use ZXC\Classes\Session;
 
 interface UserInterface
 {
@@ -63,6 +56,13 @@ interface UserInterface
      * @return mixed
      */
     public function load(array $data);
+
+    /**
+     * Find user by id or by email
+     * @param string | int $idOrEmail
+     * @return bool
+     */
+    public function find(string $idOrEmail);
 
     /**
      * @param $data array
