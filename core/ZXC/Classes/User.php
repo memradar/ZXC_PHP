@@ -10,6 +10,7 @@ namespace ZXC\Classes;
 
 
 use ZXC\ZXC;
+use ZXC\ZXCModules\Config;
 
 class User
 {
@@ -25,6 +26,7 @@ class User
 
     /**
      * Register User
+     * @return bool
      * @throws \Exception
      */
 
@@ -48,13 +50,20 @@ class User
         $passwordHash = Helper::getPasswordHash($data['password1']);
         $activationKey = Helper::createHash();
 
-        $this->db->insert('zxc.user', [
-            'login' => $login,
-            'email' => $email,
-            'password' => $passwordHash,
-            'joined' => $joined,
-            'accountactivationkey' => $activationKey
+        $configUser = Config::get('ZXC/User');
+        $insert = $this->db->insert($configUser['table'], [
+            $configUser['register']['login'] => $login,
+            $configUser['register']['email'] => $email,
+            $configUser['register']['password'] => $passwordHash,
+            $configUser['register']['joined'] => $joined,
+            $configUser['register']['accountactivationkey'] => $activationKey
         ]);
+        if (!$insert) {
+            $errorInsert = $this->db->getErrorMessage();
+            ZXC::getInstance()->getLogger()->error($errorInsert, $data);
+            return false;
+        }
+        return true;
     }
 
     /**

@@ -5,6 +5,7 @@ namespace ZXC;
 require_once 'ZXCModules/Autoload.php';
 
 use ZXC\Patterns\Singleton;
+use ZXC\ZXCModules\Autoload;
 use ZXC\ZXCModules\HTTP;
 use ZXC\ZXCModules\Config;
 use ZXC\ZXCModules\Logger;
@@ -30,6 +31,9 @@ class ZXC
     function initialize(array $config = [])
     {
         Config::getInstance()->initialize($config);
+
+        $configAutoloadDir = Config::get('ZXC/Autoload');
+        Autoload::getInstance()->initialize(    $configAutoloadDir);
 
         $this->http = HTTP::getInstance();
 

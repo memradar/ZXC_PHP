@@ -137,6 +137,3 @@ class Autoload
 }
 
 spl_autoload_register('ZXC\ZXCModules\Autoload::autoload');
-$autoloader = Autoload::getInstance();
-$autoloader->initialize(['' => true, '../../hs' => true]);
-return $autoloader;

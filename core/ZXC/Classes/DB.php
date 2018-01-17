@@ -31,6 +31,7 @@ class DB
     private $lastResult;
     private $lastInsertId;
     private $fetchStyle = \PDO::FETCH_ASSOC;
+    private $errorMessage;
 
     /**
      * DB constructor.
@@ -152,6 +153,7 @@ class DB
             return $resultArr;
         } catch (\Exception $e) {
             $this->rollBack();
+            $this->errorMessage = $e->getMessage();
             $this->error = true;
         }
         return false;
@@ -322,5 +324,13 @@ class DB
     public function setFetchStyle($fetchStyle): void
     {
         $this->fetchStyle = $fetchStyle;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getErrorMessage()
+    {
+        return $this->errorMessage;
     }
 }
