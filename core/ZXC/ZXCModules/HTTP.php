@@ -99,7 +99,8 @@ class HTTP
     {
         $this->server = &$_SERVER;
         $this->method = &$this->server['REQUEST_METHOD'];
-        $this->path = &$this->server['REQUEST_URI'];
+        $path = parse_url($this->server['REQUEST_URI']);
+        $this->path = $path['path'];
         $this->post = &$_POST;
         $this->get = &$_GET;
         $this->baseRoute = dirname($_SERVER['SCRIPT_NAME']);
