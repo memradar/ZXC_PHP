@@ -178,7 +178,7 @@ class HTTP
         return $this->baseRoute;
     }
 
-    public function existInput($name)
+    public function getInput($name)
     {
         //TODO HEAD PUT.....
         if (isset($this->post[$name])) {

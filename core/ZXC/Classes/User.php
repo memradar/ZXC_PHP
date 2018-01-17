@@ -32,7 +32,7 @@ class User
 
     public function register()
     {
-        $data = ZXC::getInstance()->getHttp()->existInput('registerUser');
+        $data = ZXC::getInstance()->getHttp()->getInput('registerUser');
         if (!$data) {
             throw new \Exception('registerUser not found in HTTP request');
         }
