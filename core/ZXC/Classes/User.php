@@ -26,7 +26,7 @@ class User
 
     /**
      * Register User
-     * @return bool
+     * @return bool | array
      * @throws \Exception
      */
 
@@ -63,7 +63,12 @@ class User
             ZXC::getInstance()->getLogger()->error($errorInsert, $data);
             return false;
         }
-        return true;
+        return [
+            $configUser['register']['login'] => $login,
+            $configUser['register']['email'] => $email,
+            $configUser['register']['joined'] => $joined,
+            $configUser['register']['accountactivationkey'] => $activationKey
+        ];
     }
 
     /**
