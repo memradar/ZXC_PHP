@@ -18,10 +18,41 @@ class User
      * @var $db \ZXC\Classes\DB
      */
     private $db;
+    /**
+     * Keep last error message
+     * @var
+     */
+    private $errorMessage;
+    /**
+     * Config::get('ZXC/User')
+     * @var
+     */
+    private $config;
+    /**
+     * Information about logged in user from user table
+     * @var
+     */
+    private $data;
+    /**
+     * @var bool
+     */
+    private $isLoggedIn;
+    /**
+     * @var bool
+     */
+    private $isPageOwner;
 
-    public function __construct(array $data = [])
+    /**
+     * User constructor.
+     * @throws \Exception
+     */
+    public function __construct()
     {
         $this->db = \ZXC\ZXCModules\DB::getInstance();
+        $this->config = Config::get('ZXC/User');
+        if (!$this->config) {
+            throw new \Exception('ZXC/User config is not defined in config file');
+        }
     }
 
     /**
@@ -46,29 +77,93 @@ class User
 
         $login = $data['login'];
         $email = Helper::getCleanEmail($data['email']);
-        $joined = date(DATE_RFC822, time());
+        $joined = date('Y-m-d H:i:s');
         $passwordHash = Helper::getPasswordHash($data['password1']);
         $activationKey = Helper::createHash();
 
-        $configUser = Config::get('ZXC/User');
-        $insert = $this->db->insert($configUser['table'], [
-            $configUser['register']['login'] => $login,
-            $configUser['register']['email'] => $email,
-            $configUser['register']['password'] => $passwordHash,
-            $configUser['register']['joined'] => $joined,
-            $configUser['register']['accountactivationkey'] => $activationKey
+        $insert = $this->db->insert($this->config['table'], [
+            $this->config['register']['login'] => $login,
+            $this->config['register']['email'] => $email,
+            $this->config['register']['password'] => $passwordHash,
+            $this->config['register']['joined'] => $joined,
+            $this->config['register']['accountactivationkey'] => $activationKey
         ]);
         if (!$insert) {
-            $errorInsert = $this->db->getErrorMessage();
-            ZXC::getInstance()->getLogger()->error($errorInsert, $data);
+            $this->errorMessage = $this->db->getErrorMessage();
+            $logger = ZXC::getInstance()->getLogger();
+            if ($logger) {
+                $logger->error($this->errorMessage, $data);
+            }
             return false;
         }
         return [
-            $configUser['register']['login'] => $login,
-            $configUser['register']['email'] => $email,
-            $configUser['register']['joined'] => $joined,
-            $configUser['register']['accountactivationkey'] => $activationKey
+            $this->config['register']['login'] => $login,
+            $this->config['register']['email'] => $email,
+            $this->config['register']['joined'] => $joined,
+            $this->config['register']['accountactivationkey'] => $activationKey
         ];
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function login()
+    {
+        $data = ZXC::getInstance()->getHttp()->getInput('loginUser');
+        if (!$data) {
+            throw new \Exception('loginUser not found in HTTP request');
+        }
+        $data = json_decode($data, true);
+        if (!$data) {
+            throw new \Exception(' Can not decode request loginUser is not valid JSON');
+        }
+        if (!$this->checkLoginInput($data)) {
+            throw new \Exception('loginUser data is not valid');
+        }
+        $user = $this->find($data['email']);
+        if (!$user || $user['block'] === 1) {
+            $this->errorMessage = 'User is blocked';
+            return false;
+        }
+        if (!Helper::passwordVerify($data['password'], $user['password'])) {
+            $this->errorMessage = 'Password is not valid';
+            return false;
+        }
+        $this->data = $user;
+        $this->isLoggedIn = true;
+        $session = Session::getInstance();
+        $session->set('User', [
+            'id' => $user['id'],
+            'login' => $user['login'],
+            'email' => $user['email'],
+            'fname' => $user['firstname'],
+            'lname' => $user['lastname']
+        ]);
+        return true;
+    }
+
+    public function find($userEmailOrId = null)
+    {
+        $field = is_numeric($userEmailOrId) ? 'id' : 'email';
+        $result = $this->db->select($this->config['table'], '*', [$field, '=', $userEmailOrId]);
+        if (!$result) {
+            return false;
+        }
+        return $result[0];
+    }
+
+    private function checkLoginInput(array $data = [])
+    {
+        if (!isset($data['email']) || !isset($data['password'])) {
+            return false;
+        }
+        if (!Helper::isEmail($data['email'])) {
+            return false;
+        }
+        if (!Helper::isStrengthPassword($data['password'])) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -91,5 +186,13 @@ class User
             return false;
         }
         return true;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getErrorMessage()
+    {
+        return $this->errorMessage;
     }
 }

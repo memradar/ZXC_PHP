@@ -84,6 +84,11 @@ class Helper
         return password_hash($password, PASSWORD_BCRYPT, $options);
     }
 
+    public static function passwordVerify($password, $hash)
+    {
+        return password_verify($password, $hash);
+    }
+
     public static function isIP($ip)
     {
         return filter_var($ip, FILTER_VALIDATE_IP);

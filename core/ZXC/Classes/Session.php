@@ -3,6 +3,7 @@
 namespace ZXC\Classes;
 
 use ZXC\ZXC;
+use ZXC\ZXCModules\Config;
 use ZXC\ZXCModules\HTTP;
 use ZXC\Patterns\Singleton;
 
@@ -23,19 +24,18 @@ class Session
 
     /**
      * Session constructor.
-     * @param array $config ['time'=>7200]
      */
-    public function __construct(array $config = [])
+    private function __construct()
     {
-        $this->init($config);
+        $this->init();
     }
 
     /**
      * Initialize session
-     * @param array $config
      */
-    public function init(array $config = [])
+    public function init()
     {
+        $config = Config::get('ZXC/Session');
         $zxc = ZXC::getInstance();
         if (!isset($config['time'])) {
             $this->lifeTime = 7200;
