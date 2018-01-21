@@ -101,6 +101,6 @@ class Helper
 
     public static function createHash()
     {
-        return md5(time() . rand(0, 150));
+        return md5(uniqid().time() . rand(0, 150));
     }
 }

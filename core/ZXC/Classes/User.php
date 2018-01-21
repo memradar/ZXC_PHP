@@ -131,6 +131,28 @@ class User
         }
         $this->data = $user;
         $this->isLoggedIn = true;
+
+        $remember = isset($data['remember']) && $data['remember'] === true ? true : false;
+        if ($remember) {
+            $userHashFromDB = $this->db->select($this->config['table_session'], '*',
+                ['userid', '=', $this->data['id']]);
+            if (!$userHashFromDB) {
+                $hash = Helper::createHash();
+                $insertData = ['userid' => $this->data['id'], 'session' => $hash];
+                $insertResult = $this->db->insert($this->config['table_session'], $insertData);
+                if (!$insertResult) {
+                    $this->errorMessage = 'Error insert data in table ' . $this->config['table_session'] . 'see log file';
+                    $logger = ZXC::getInstance()->getLogger();
+                    if ($logger && $logger->getLevel() === 'debug') {
+                        $logger->error('Can not insert data in table ' . $this->config['table_session'], $insertData);
+                    }
+                }
+            } else {
+                $hash = $userHashFromDB[0]['session'];
+            }
+            Cookie::set($this->config['remember']['name'], $hash, $this->config['remember']['expiry']);
+        }
+
         $session = Session::getInstance();
         $session->set('User', [
             'id' => $user['id'],
@@ -140,6 +162,30 @@ class User
             'lname' => $user['lastname']
         ]);
         return true;
+    }
+
+    public function logout()
+    {
+        $session = Session::getInstance();
+        $session->delete('User');
+        Cookie::delete($this->config['remember']['name']);
+        return true;
+    }
+
+    public function deleteAllOtherSessions()
+    {
+        $hash = Helper::createHash();
+        Cookie::delete($this->config['remember']['name']);
+        $insertData = ['userid' => $this->data['id'], 'session' => $hash];
+        $insertResult = $this->db->insert($this->config['table_session'], $insertData);
+        if (!$insertResult) {
+            $this->errorMessage = 'Error insert data in table ' . $this->config['table_session'] . ' function deleteAllOtherSessions see log file';
+            $logger = ZXC::getInstance()->getLogger();
+            if ($logger && $logger->getLevel() === 'debug') {
+                $logger->error('Can not insert data in table ' . $this->config['table_session'], $insertData);
+            }
+        }
+        Cookie::set($this->config['remember']['name'], $hash, $this->config['remember']['expiry']);
     }
 
     public function find($userEmailOrId = null)

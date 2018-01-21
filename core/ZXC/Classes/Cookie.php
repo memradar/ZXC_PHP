@@ -21,7 +21,7 @@ class Cookie
         return $_COOKIE[$name];
     }
 
-    public static function put($name, $value, $expire)
+    public static function set($name, $value, $expire)
     {
         if (!setcookie($name, $value, time() + $expire, '/')) {
             return true;
@@ -31,6 +31,6 @@ class Cookie
 
     public static function delete($name)
     {
-        self::put($name, '', time() - 1);
+        self::set($name, '', time() - 1);
     }
 }
