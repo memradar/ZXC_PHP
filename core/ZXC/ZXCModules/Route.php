@@ -29,7 +29,7 @@ class Route
     {
         $zxc = ZXC::getInstance();
         if (!$params) {
-            $logger = $zxc->getModule('Logger');
+            $logger = $zxc->getLogger();
             if ($logger) {
                 $logger->critical('Route is not valid! Must be like this \'POST|/test/:route/|Class:method\'',
                     $params);
@@ -175,6 +175,15 @@ class Route
         return true;
     }
 
+    public function classUsesTrait($className, string $traitName)
+    {
+        $traits = class_uses($className, true);
+        if ($traits) {
+            return in_array($traitName, $traits, true);
+        }
+        return false;
+    }
+
     public function executeRoute($zxc)
     {
         $resultMainFunc = null;
@@ -185,10 +194,11 @@ class Route
         if ($this->class) {
             if (!class_exists($this->class)) {
                 $zxc = ZXC::getInstance();
-//                $zxc->sysLog($this->class . ' is not defined. Can not execute route with params',
-//                    $this->params ? $this->params : []);
+                $logger = $zxc->getLogger();
+                $logger->critical('Class ' . $this->class . ' not exist');
             }
-            if (is_subclass_of($this->class, 'ZXC\Factory', true)) {
+            if (is_subclass_of($this->class, 'ZXC\Factory', true) ||
+                $this->classUsesTrait($this->class, 'ZXC\Patterns\Singleton')) {
                 $userClass = call_user_func(
                     $this->class . '::getInstance'
                 );

@@ -33,7 +33,7 @@ class ZXC
         Config::getInstance()->initialize($config);
 
         $configAutoloadDir = Config::get('ZXC/Autoload');
-        Autoload::getInstance()->initialize(    $configAutoloadDir);
+        Autoload::getInstance()->initialize($configAutoloadDir);
 
         $this->http = HTTP::getInstance();
 
@@ -72,6 +72,9 @@ class ZXC
 
     public function writeLog($msg = '', $param = []): bool
     {
+        if (!$this->logger) {
+            return false;
+        }
         if ($this->logger->getLevel() !== 'debug') {
             return false;
         }
