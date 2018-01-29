@@ -99,7 +99,11 @@ class HTTP
     {
         $this->server = &$_SERVER;
         $this->method = &$this->server['REQUEST_METHOD'];
-        $path = parse_url($this->server['REQUEST_URI']);
+        if ($this->server['REQUEST_URI'] === '/') {
+            $path['path'] = $this->server['REQUEST_URI'];
+        } else {
+            $path = parse_url($this->server['REQUEST_URI']);
+        }
         $this->path = $path['path'];
         $this->post = &$_POST;
         $this->get = &$_GET;
@@ -114,7 +118,7 @@ class HTTP
     private function normalize()
     {
         $lastSlash = substr($this->path, -1);
-        if ($lastSlash === '/') {
+        if ($lastSlash === '/' && $this->path !== '/') {
             $this->path = rtrim($this->path, '/');
         }
     }

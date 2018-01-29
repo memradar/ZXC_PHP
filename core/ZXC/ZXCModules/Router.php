@@ -90,6 +90,12 @@ class Router
         if (isset($params[2])) {
             $classAndMethod = explode(':', $params[2]);
         }
+
+
+        if ($params[1] !== '/') {
+            $params[1] = rtrim($params[1], '/');
+        }
+
         $before = null;
         $after = null;
         if (isset($route['before'])) {
