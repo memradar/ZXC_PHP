@@ -46,7 +46,7 @@ class User
      * User constructor.
      * @throws \Exception
      */
-    public function __construct()
+    protected function __construct()
     {
         $this->db = \ZXC\ZXCModules\DB::getInstance();
         $this->config = Config::get('ZXC/User');
