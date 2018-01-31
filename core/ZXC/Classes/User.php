@@ -17,7 +17,7 @@ class User
     /**
      * @var $db \ZXC\Classes\DB
      */
-    private $db;
+    protected $db;
     /**
      * Keep last error message
      * @var
@@ -27,7 +27,7 @@ class User
      * Config::get('ZXC/User')
      * @var
      */
-    private $config;
+    protected $config;
     /**
      * Information about logged in user from user table
      * @var
@@ -188,9 +188,32 @@ class User
         Cookie::set($this->config['remember']['name'], $hash, $this->config['remember']['expiry']);
     }
 
+    /**
+     * Get field name fo search user from string
+     * @param $string
+     * @return string
+     */
+    public function getFieldFromString($string)
+    {
+        if (is_string($string)) {
+            if (Helper::isEmail($string)) {
+                return 'email';
+            } else {
+                return 'login';
+            }
+        } else {
+            return 'id';
+        }
+    }
+
+    /**
+     * Find user by id | login | email
+     * @param null $userEmailOrId
+     * @return bool
+     */
     public function find($userEmailOrId = null)
     {
-        $field = is_numeric($userEmailOrId) ? 'id' : 'email';
+        $field = $this->getFieldFromString($userEmailOrId);
         $result = $this->db->select($this->config['table'], '*', [$field, '=', $userEmailOrId]);
         if (!$result) {
             return false;
@@ -240,5 +263,31 @@ class User
     public function getErrorMessage()
     {
         return $this->errorMessage;
+    }
+
+    /**
+     * @param mixed $errorMessage
+     */
+    public function setErrorMessage($errorMessage): void
+    {
+        $this->errorMessage = $errorMessage;
+    }
+
+    /**
+     * @param null $userEmailOrId
+     * @return bool
+     * @throws \Exception
+     */
+    public function fetch($userEmailOrId = null)
+    {
+        if (!$userEmailOrId) {
+            throw new \Exception('$userEmailOrId is not defined');
+        }
+        $this->data = $this->find($userEmailOrId);
+        if (!$this->data) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

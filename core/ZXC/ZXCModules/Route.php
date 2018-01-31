@@ -186,6 +186,7 @@ class Route
 
     public function executeRoute($zxc)
     {
+        $out = false;
         $resultMainFunc = null;
         $resultBefore = null;
         $resultAfter = null;
@@ -202,7 +203,7 @@ class Route
                 $userClass = call_user_func(
                     $this->class . '::getInstance'
                 );
-                call_user_func_array(
+                $out = call_user_func_array(
                     [$userClass, $this->method],
                     [$zxc, $paramsForSecondRouteArguments]
                 );
@@ -222,9 +223,9 @@ class Route
                                 [$userClass, $this->method],
                                 [$zxc, $paramsForSecondRouteArguments]
                             );
-                            $this->callAfter($zxc, $resultMainFunc, $userClass);
+                            $out = $this->callAfter($zxc, $resultMainFunc, $userClass);
                         } else {
-                            call_user_func_array(
+                            $out = call_user_func_array(
                                 [$userClass, $this->method],
                                 [$zxc, $paramsForSecondRouteArguments]
                             );
@@ -241,9 +242,9 @@ class Route
                 $resultMainFunc = call_user_func_array(
                     $this->func, [$zxc, $paramsForSecondRouteArguments]
                 );
-                $this->callAfter($zxc, $resultMainFunc);
+                $out = $this->callAfter($zxc, $resultMainFunc);
             } else {
-                call_user_func_array(
+                $out = call_user_func_array(
                     $this->func, [$zxc, $paramsForSecondRouteArguments]
                 );
                 $this->callAfter($zxc);
@@ -251,6 +252,7 @@ class Route
         } else {
             throw new \InvalidArgumentException('Main function or method is not defined for the route');
         }
+        return $out;
     }
 
     /**

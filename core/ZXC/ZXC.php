@@ -64,9 +64,9 @@ class ZXC
             return false;
         }
         ob_start();
-        $routeParams->executeRoute($this);
+        $routeHandler = $routeParams->executeRoute($this);
         $body = ob_get_clean();
-        echo $body;
+        echo json_encode(['status' => 200, 'body' => $body, 'handler' => $routeHandler]);
         return true;
     }
 
