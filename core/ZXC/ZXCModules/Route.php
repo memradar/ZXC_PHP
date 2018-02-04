@@ -184,6 +184,11 @@ class Route
         return false;
     }
 
+    /**
+     * Execute route 
+     * @param ZXC $zxc
+     * @return bool|mixed
+     */
     public function executeRoute($zxc)
     {
         $out = false;

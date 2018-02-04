@@ -64,8 +64,20 @@ class ZXC
             return false;
         }
         ob_start();
-        $routeHandler = $routeParams->executeRoute($this);
-        $body = ob_get_clean();
+        //TODO add codes for Exception
+        try {
+            $routeHandler = $routeParams->executeRoute($this);
+            $body = ob_get_clean();
+        } catch (\InvalidArgumentException $e) {
+            ob_end_clean();
+            $body = '';
+            $routeHandler = '';
+        } catch (\Exception $e) {
+            ob_end_clean();
+            $body = '';
+            $routeHandler = '';
+        }
+
         echo json_encode(['status' => 200, 'body' => $body, 'handler' => $routeHandler]);
         return true;
     }

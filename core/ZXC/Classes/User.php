@@ -9,6 +9,7 @@
 namespace ZXC\Classes;
 
 
+use PHPUnit\TextUI\Command;
 use ZXC\ZXC;
 use ZXC\ZXCModules\Config;
 
@@ -105,10 +106,12 @@ class User
     }
 
     /**
+     * HTTP::loginUser [password=>'', email=>'']
      * @throws \Exception
      */
     public function login()
     {
+        //TODO Device count for login
         $data = ZXC::getInstance()->getHttp()->getInput('loginUser');
         if (!$data) {
             throw new \Exception('loginUser not found in HTTP request');
@@ -122,11 +125,11 @@ class User
         }
         $user = $this->find($data['email']);
         if (!$user || $user['block'] === 1) {
-            $this->errorMessage = 'User is blocked';
+            $this->errorMessage = Config::get('ZXC/User/codes/User is blocked');
             return false;
         }
         if (!Helper::passwordVerify($data['password'], $user['password'])) {
-            $this->errorMessage = 'Password is not valid';
+            $this->errorMessage = Config::get('ZXC/User/codes/Invalid password');
             return false;
         }
         $this->data = $user;
@@ -141,7 +144,7 @@ class User
                 $insertData = ['userid' => $this->data['id'], 'session' => $hash];
                 $insertResult = $this->db->insert($this->config['table_session'], $insertData);
                 if (!$insertResult) {
-                    $this->errorMessage = 'Error insert data in table ' . $this->config['table_session'] . 'see log file';
+                    $this->errorMessage = Config::get('ZXC/User/codes/Error insert data in session table') . ' ' . $this->config['table_session'] . 'see log file';
                     $logger = ZXC::getInstance()->getLogger();
                     if ($logger && $logger->getLevel() === 'debug') {
                         $logger->error('Can not insert data in table ' . $this->config['table_session'], $insertData);
@@ -208,13 +211,13 @@ class User
 
     /**
      * Find user by id | login | email
-     * @param null $userEmailOrId
+     * @param null $userEmailOrIdOrLogin
      * @return bool
      */
-    public function find($userEmailOrId = null)
+    public function find($userEmailOrIdOrLogin = null)
     {
-        $field = $this->getFieldFromString($userEmailOrId);
-        $result = $this->db->select($this->config['table'], '*', [$field, '=', $userEmailOrId]);
+        $field = $this->getFieldFromString($userEmailOrIdOrLogin);
+        $result = $this->db->select($this->config['table'], '*', [$field, '=', $userEmailOrIdOrLogin]);
         if (!$result) {
             return false;
         }
@@ -289,5 +292,62 @@ class User
         } else {
             return true;
         }
+    }
+
+    /**
+     * @param string $key
+     * @return bool|array
+     * @throws \Exception
+     */
+    public function checkHTTP(string $key)
+    {
+        $data = ZXC::getInstance()->getHttp()->getInput($key);
+        if (!$data) {
+            throw new \Exception('confirmEmail not found in HTTP request');
+        }
+        $data = json_decode($data, true);
+        if (!$data) {
+            throw new \Exception(' Can not decode request confirmEmail is not valid JSON');
+        }
+        return $data;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function confirmEmail()
+    {
+        $data = $this->checkHTTP('confirmEmail');
+        if (!$this->checkConfirmEmailInput($data)) {
+            throw new \Exception('loginUser data is not valid');
+        }
+        $user = $this->find($data['login']);
+        if (!$user) {
+            $this->errorMessage = Config::get('ZXC/User/codes/Can not confirm email for user');
+            return false;
+        }
+        if ($user['block'] !== 1) {
+            $this->errorMessage = Config::get('ZXC/User/codes/Can not confirm email for user, user has confirmed email');
+            return false;
+        }
+        if ($user[$this->config['confirmation']['key']] !== $data['key']) {
+            $this->errorMessage = Config::get('ZXC/User/codes/Can not confirm email for user invalid key');
+            return false;
+        }
+        $result = $this->db->update($this->config['table'], [$this->config['confirmation']['key'] => '', 'block' => 0],
+            [$this->config['login']['login'], '=', $data['login']]);
+        if (!$result) {
+            $this->errorMessage = Config::get('ZXC/User/codes/Can not update values in db for email conformation');
+            return false;
+        }
+        return true;
+    }
+
+    public function checkConfirmEmailInput($data)
+    {
+        if (isset($data['login']) && isset($data['key'])) {
+            return true;
+        }
+        return false;
     }
 }

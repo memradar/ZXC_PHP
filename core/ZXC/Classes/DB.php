@@ -232,7 +232,7 @@ class DB
         }
 
         if (in_array($object['where'][1], $this->conditions)) {
-            $query = "{$object['action']} {$object['fields']} FROM {$object['table']} WHERE  {$object['where'][0]} = ?";
+            $query = "{$object['action']} {$object['fields']} FROM {$object['table']} WHERE  {$object['where'][0]} {$object['where'][1]} ?";
             return $this->exec($query, [$object['where'][2]]);
         }
         return false;
@@ -296,9 +296,21 @@ class DB
         return $result;
     }
 
-    public function update()
+    public function update($table, $fieldsValues = [], $where = [])
     {
-
+        if (!$where || !in_array($where[1], $this->conditions) || !$where[2]) {
+            return false;
+        }
+        $fields = [];
+        foreach ($fieldsValues as $key => $value) {
+            $fields [] = $key . '=?';
+        }
+        $fields = implode(',', $fields);
+        $query = "UPDATE {$table} SET $fields WHERE {$where[0]} {$where[1]} ?";
+        $values = array_values($fieldsValues);
+        $values [] = $where[2];
+        $result = $this->exec($query, $values);
+        return $result;
     }
 
     /**
