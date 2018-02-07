@@ -325,7 +325,7 @@ class User
             $this->errorMessage = Config::get('ZXC/User/codes/Can not confirm email for user');
             return false;
         }
-        if ($user['block'] !== 1) {
+        if ($user['block'] !== 1 || $user[$this->config['confirmation']['accountactivationattr']] !== 0) {
             $this->errorMessage = Config::get('ZXC/User/codes/Can not confirm email for user, user has confirmed email');
             return false;
         }
@@ -333,7 +333,12 @@ class User
             $this->errorMessage = Config::get('ZXC/User/codes/Can not confirm email for user invalid key');
             return false;
         }
-        $result = $this->db->update($this->config['table'], [$this->config['confirmation']['key'] => '', 'block' => 0],
+        $result = $this->db->update($this->config['table'],
+            [
+                $this->config['confirmation']['key'] => '',
+                $this->config['confirmation']['block'] => 0,
+                $this->config['confirmation']['accountactivationattr'] => 1
+            ],
             [$this->config['login']['login'], '=', $data['login']]);
         if (!$result) {
             $this->errorMessage = Config::get('ZXC/User/codes/Can not update values in db for email conformation');

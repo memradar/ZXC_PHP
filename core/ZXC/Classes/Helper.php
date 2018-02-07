@@ -101,6 +101,11 @@ class Helper
 
     public static function createHash()
     {
-        return md5(uniqid().time() . rand(0, 150));
+        return md5(uniqid() . time() . rand(0, 150));
+    }
+
+    public static function getResponse(int $code = 500, array $data = [])
+    {
+        return ['status' => $code, 'data' => $data];
     }
 }
