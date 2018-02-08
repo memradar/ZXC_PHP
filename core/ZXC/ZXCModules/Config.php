@@ -36,4 +36,23 @@ class Config
         }
         return $configParameters;
     }
+
+    /**
+     * @param string $configPath
+     * @return bool
+     * @throws \Exception
+     */
+    public static function add(string $configPath = '')
+    {
+        if (file_exists($configPath)) {
+            $config = require_once $configPath;
+            if ($config) {
+                self::$config = array_merge_recursive(self::$config, $config);
+                return true;
+            }
+            return false;
+        } else {
+            throw new \Exception(self::get('ZXC/User/codes/Config private file not found'));
+        }
+    }
 }

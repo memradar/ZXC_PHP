@@ -9,6 +9,7 @@
 namespace ZXC\Classes;
 
 
+use ZXC\Classes\Mail\Mailer;
 use ZXC\ZXC;
 use ZXC\ZXCModules\Config;
 
@@ -41,6 +42,42 @@ class User
      * @var bool
      */
     private $isPageOwner;
+    /**
+     * @var string
+     */
+    private $smtpServer;
+    /**
+     * @var int
+     */
+    private $smtpPort;
+    /**
+     * @var bool
+     */
+    private $smtpSSL;
+    /**
+     * @var string
+     */
+    private $smtpUser;
+    /**
+     * @var string
+     */
+    private $smtpPassword;
+    /**
+     * @var string
+     */
+    private $smtpFrom;
+    /**
+     * @var string
+     */
+    private $smtpFromEmail;
+    /**
+     * @var bool
+     */
+    private $isSMTPActive = false;
+    /**
+     * @var Mailer
+     */
+    private $mailer;
 
     /**
      * User constructor.
@@ -353,5 +390,56 @@ class User
             return true;
         }
         return false;
+    }
+
+    /**
+     * @param array $config
+     * @return bool
+     * @throws \Exception
+     */
+    protected function setMailAuthProperties(array $config = [])
+    {
+        if (!$config || !isset($config['server'])
+            || !isset($config['port']) || !isset($config['ssl'])
+            || !isset($config['user']) || !isset($config['password'])
+            || !isset($config['from']) || !isset($config['fromEmail'])) {
+            $this->isSMTPActive = false;
+            throw new \Exception(Config::get('ZXC/User/codes/Config for connect not defined'));
+        }
+        $this->smtpSSL = $config['ssl'];
+        $this->smtpUser = $config['user'];
+        $this->smtpFrom = $config['from'];
+        $this->smtpPort = $config['port'];
+        $this->smtpServer = $config['server'];
+        $this->smtpPassword = $config['password'];
+        $this->smtpFromEmail = $config['fromEmail'];
+        $this->isSMTPActive = true;
+        $this->mailer = new Mailer();
+        $this->mailer->setServer($this->smtpServer, $this->smtpPort, $this->smtpSSL)
+            ->setAuth($this->smtpUser, $this->smtpPassword)
+            ->setFrom($this->smtpFrom, $this->smtpFromEmail);
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isIsSMTPActive(): bool
+    {
+        return $this->isSMTPActive;
+    }
+
+    /**
+     * @param string $body
+     * @param string $subject
+     * @param string $userName
+     * @param string $userEmail
+     * @return bool
+     * @throws \Exception
+     */
+    protected function sendEmail(string $body, string $subject, string $userName, string $userEmail): bool
+    {
+        $result = $this->mailer->addTo($userName, $userEmail)->setSubject($subject)->setBody($body)->send();
+        return $result;
     }
 }
