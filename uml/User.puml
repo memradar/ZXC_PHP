@@ -1,0 +1,40 @@
+@startuml
+
+class User{
+    # $db;
+    - $errorMessage;
+    # $config;
+    - $data;
+    - $isLoggedIn;
+    - $isPageOwner;
+    - $smtpServer;
+    - $smtpPort;
+    - $smtpSSL;
+    - $smtpUser;
+    - $smtpPassword;
+    - $smtpFrom;
+    - $smtpFromEmail;
+    - $isSMTPActive = false;
+    - $mailer;
+ 
+    # function __construct()
+    + function register()
+    + function login()
+    + function logout()
+    + function deleteAllOtherSessions()
+    + function getFieldFromString($string)
+    + function find($userEmailOrIdOrLogin = null) 
+    - function checkLoginInput(array $data = [])
+    - function checkRegisterInput(array $data = [])
+    + function getErrorMessage()
+    + function setErrorMessage($errorMessage): void
+    + function fetch($userEmailOrId = null)
+    + function checkHTTP(string $key)
+    + function confirmEmail() 
+    + function checkConfirmEmailInput($data) 
+    # function setMailAuthProperties(array $config = [])
+    + function isIsSMTPActive(): bool
+    # function sendEmail(string $body, string $subject, string $userName, string $userEmail): bool
+}
+
+@enduml

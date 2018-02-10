@@ -69,10 +69,12 @@ class ZXC
             $routeHandler = $routeParams->executeRoute($this);
             $body = ob_get_clean();
         } catch (\InvalidArgumentException $e) {
+            $this->writeLog($e->getMessage());
             ob_end_clean();
             $body = '';
             $routeHandler = '';
         } catch (\Exception $e) {
+            $this->writeLog($e->getMessage());
             ob_end_clean();
             $body = '';
             $routeHandler = '';

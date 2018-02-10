@@ -193,4 +193,9 @@ class HTTP
             return false;
         }
     }
+
+    public function getURL()
+    {
+        return $this->scheme . '://' . $this->host;
+    }
 }
