@@ -100,7 +100,7 @@ class Session
      */
     public function get($key)
     {
-        if (isset($this->sess)) {
+        if (isset($this->sess[$this->prefix][$key])) {
             return $this->sess[$this->prefix][$key];
         }
         return false;

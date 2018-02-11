@@ -37,7 +37,7 @@ class User
     /**
      * @var bool
      */
-    private $isLoggedIn;
+    private $isLoggedIn = false;
     /**
      * @var bool
      */
@@ -78,6 +78,10 @@ class User
      * @var Mailer
      */
     private $mailer;
+    /**
+     * @var bool
+     */
+    protected $confirmationEnabled = false;
 
     /**
      * User constructor.
@@ -89,6 +93,24 @@ class User
         $this->config = Config::get('ZXC/User');
         if (!$this->config) {
             throw new \Exception('ZXC/User config is not defined in config file');
+        }
+        $this->confirmationEnabled = Config::get('ZXC/User/confirmation/enabled');
+        $session = Session::getInstance();
+        $sessionUser = $session->get('User');
+        $findUserBy = false;
+        if ($sessionUser) {
+            $findUserBy = $sessionUser['login'];
+        } else {
+            $hasHash = Cookie::get($this->config['remember']['name']);
+            if ($hasHash) {
+                $findUserBy = $this->getUserIdBySessionHash($hasHash);
+            }
+        }
+        if ($findUserBy) {
+            if ($this->fetch($findUserBy)) {
+                $this->isLoggedIn = true;
+                $this->setUserSession();
+            }
         }
     }
 
@@ -118,13 +140,27 @@ class User
         $passwordHash = Helper::getPasswordHash($data['password1']);
         $activationKey = Helper::createHash();
 
-        $insert = $this->db->insert($this->config['table'], [
-            $this->config['register']['login'] => $login,
-            $this->config['register']['email'] => $email,
-            $this->config['register']['password'] => $passwordHash,
-            $this->config['register']['joined'] => $joined,
-            $this->config['register']['accountactivationkey'] => $activationKey
-        ]);
+        if ($this->confirmationEnabled) {
+            $insertData = [
+                $this->config['register']['login'] => $login,
+                $this->config['register']['email'] => $email,
+                $this->config['register']['password'] => $passwordHash,
+                $this->config['register']['joined'] => $joined,
+                $this->config['register']['accountactivationkey'] => $activationKey
+            ];
+        } else {
+            $insertData = [
+                $this->config['register']['login'] => $login,
+                $this->config['register']['email'] => $email,
+                $this->config['register']['password'] => $passwordHash,
+                $this->config['register']['joined'] => $joined,
+                $this->config['register']['accountactivationkey'] => '',
+                $this->config['register']['block'] => 0,
+                $this->config['register']['accountactivationattr'] => 1
+            ];
+        }
+
+        $insert = $this->db->insert($this->config['table'], $insertData);
         if (!$insert) {
             $this->errorMessage = $this->db->getErrorMessage();
             $logger = ZXC::getInstance()->getLogger();
@@ -148,6 +184,9 @@ class User
     public function login()
     {
         //TODO Device count for login
+        if ($this->isLoggedIn) {
+            return true;
+        }
         $data = ZXC::getInstance()->getHttp()->getInput('loginUser');
         if (!$data) {
             throw new \Exception('loginUser not found in HTTP request');
@@ -173,10 +212,9 @@ class User
 
         $remember = isset($data['remember']) && $data['remember'] === true ? true : false;
         if ($remember) {
-            $userHashFromDB = $this->db->select($this->config['table_session'], '*',
-                ['userid', '=', $this->data['id']]);
-            if (!$userHashFromDB) {
-                $hash = Helper::createHash();
+            $hash = Helper::createHash();
+            if ($this->data['device_count'] === 1) {
+                $this->db->delete($this->config['table_session'], ['userid', '=', $this->data['id']]);
                 $insertData = ['userid' => $this->data['id'], 'session' => $hash];
                 $insertResult = $this->db->insert($this->config['table_session'], $insertData);
                 if (!$insertResult) {
@@ -187,18 +225,46 @@ class User
                     }
                 }
             } else {
-                $hash = $userHashFromDB[0]['session'];
+                $userHashFromDB = $this->db->select($this->config['table_session'], '*',
+                    ['userid', '=', $this->data['id']]);
+                if (!$userHashFromDB) {
+                    $insertData = ['userid' => $this->data['id'], 'session' => $hash];
+                    $insertResult = $this->db->insert($this->config['table_session'], $insertData);
+                    if (!$insertResult) {
+                        $this->errorMessage = Config::get('ZXC/User/codes/Error insert data in session table') . ' ' . $this->config['table_session'] . 'see log file';
+                        $logger = ZXC::getInstance()->getLogger();
+                        if ($logger && $logger->getLevel() === 'debug') {
+                            $logger->error('Can not insert data in table ' . $this->config['table_session'],
+                                $insertData);
+                        }
+                    }
+                } else {
+                    $hash = $userHashFromDB[0]['session'];
+                }
             }
-            Cookie::set($this->config['remember']['name'], $hash, $this->config['remember']['expiry']);
+            if (!Cookie::set($this->config['remember']['name'], $hash, $this->config['remember']['expiry'])) {
+                $logger = ZXC::getInstance()->getLogger();
+                if ($logger && $logger->getLevel() === 'debug') {
+                    $logger->warning('Can not se cookie');
+                }
+            }
         }
+        $this->setUserSession();
+        return true;
+    }
 
+    private function setUserSession()
+    {
+        if (!$this->data) {
+            return false;
+        }
         $session = Session::getInstance();
         $session->set('User', [
-            'id' => $user['id'],
-            'login' => $user['login'],
-            'email' => $user['email'],
-            'fname' => $user['firstname'],
-            'lname' => $user['lastname']
+            'id' => $this->data['id'],
+            'login' => $this->data['login'],
+            'email' => $this->data['email'],
+            'fname' => $this->data['firstname'],
+            'lname' => $this->data['lastname']
         ]);
         return true;
     }
@@ -208,6 +274,7 @@ class User
         $session = Session::getInstance();
         $session->delete('User');
         Cookie::delete($this->config['remember']['name']);
+        $this->isLoggedIn = false;
         return true;
     }
 
@@ -258,6 +325,22 @@ class User
             return false;
         }
         return $result[0];
+    }
+
+    /**
+     * @param string $hash
+     * @return bool
+     */
+    public function getUserIdBySessionHash($hash = '')
+    {
+        if (!$hash) {
+            return false;
+        }
+        $result = $this->db->select($this->config['table_session'], '*', ['session', '=', $hash]);
+        if (!$result) {
+            return false;
+        }
+        return $result[0]['userid'];
     }
 
     private function checkLoginInput(array $data = [])
@@ -313,16 +396,17 @@ class User
     }
 
     /**
-     * @param null $userEmailOrId
+     * @param null $userEmailOrIdOrLogin
      * @return bool
      * @throws \Exception
      */
-    public function fetch($userEmailOrId = null)
+    public function fetch($userEmailOrIdOrLogin = null)
     {
-        if (!$userEmailOrId) {
+        //TODO
+        if (!$userEmailOrIdOrLogin) {
             throw new \Exception('$userEmailOrId is not defined');
         }
-        $this->data = $this->find($userEmailOrId);
+        $this->data = $this->find($userEmailOrIdOrLogin);
         if (!$this->data) {
             return false;
         } else {
@@ -362,19 +446,19 @@ class User
             $this->errorMessage = Config::get('ZXC/User/codes/Can not confirm email for user');
             return false;
         }
-        if ($user['block'] !== 1 || $user[$this->config['confirmation']['accountactivationattr']] !== 0) {
+        if ($user['block'] !== 1 || $user[$this->config['register']['accountactivationattr']] !== 0) {
             $this->errorMessage = Config::get('ZXC/User/codes/Can not confirm email for user, user has confirmed email');
             return false;
         }
-        if ($user[$this->config['confirmation']['key']] !== $data['key']) {
+        if ($user[$this->config['register']['accountactivationkey']] !== $data['key']) {
             $this->errorMessage = Config::get('ZXC/User/codes/Can not confirm email for user invalid key');
             return false;
         }
         $result = $this->db->update($this->config['table'],
             [
-                $this->config['confirmation']['key'] => '',
-                $this->config['confirmation']['block'] => 0,
-                $this->config['confirmation']['accountactivationattr'] => 1
+                $this->config['register']['accountactivationkey'] => '',
+                $this->config['register']['block'] => 0,
+                $this->config['register']['accountactivationattr'] => 1
             ],
             [$this->config['login']['login'], '=', $data['login']]);
         if (!$result) {
@@ -390,6 +474,14 @@ class User
             return true;
         }
         return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isLoggedIn(): bool
+    {
+        return $this->isLoggedIn;
     }
 
     /**
