@@ -54,7 +54,7 @@ class Image
         for ($i = 0; $i < 7; $i++) {
             $src_image = imagecreatetruecolor($count, $height);
             $color = imagecolorallocate($src_image, mt_rand(0, 255), mt_rand(0, 255), mt_rand(0, 255));
-            imagettftext($src_image, 25, 0, 20, 50, $color, ZXC_ROOT . '/../../log/times_new_yorker.ttf', "$i");
+            imagettftext($src_image, 30, 0, 0, mt_rand(30, 40), $color, ZXC_ROOT . '/../../log/times_new_yorker.ttf', "$i");
             $src_w = imagesx($src_image);
             $src_h = imagesy($src_image);
             imagecopyresized(
