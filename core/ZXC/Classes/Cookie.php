@@ -18,7 +18,10 @@ class Cookie
 
     public static function get($name)
     {
-        return $_COOKIE[$name];
+        if (isset($_COOKIE[$name])) {
+            return $_COOKIE[$name];
+        }
+        return false;
     }
 
     public static function set($name, $value, $expire)
