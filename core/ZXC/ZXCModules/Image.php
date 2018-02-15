@@ -96,8 +96,11 @@ class Image
             $src_h = imagesy($charBlockImage);
             imagecopyresized($mainImage, $charBlockImage, ($i > 0 ? $i * $blockImageWidth : 0), 0, 0, 0, $src_w, $src_h,
                 $src_w, $src_h);
+            ob_start();
             imagepng($charBlockImage);
             imagedestroy($charBlockImage);
+            ob_end_clean();
+
         }
         ob_start();
         imagepng($mainImage);
