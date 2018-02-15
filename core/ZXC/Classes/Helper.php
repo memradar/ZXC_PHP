@@ -174,16 +174,22 @@ class Helper
         return ['status' => $code, 'data' => $data];
     }
 
-    public static function generateRandomText($minLength, $maxLength, $registry = true)
+    public static function generateRandomText($minLength, $maxLength, $registry = true, $ignoreSymbols = [])
     {
         $charsCount = count(self::$alphabet) - 1;
         $length = rand($minLength, $maxLength);
         $str = '';
         for ($i = 0; $i < $length; $i++) {
+            $symbol = self::$alphabet[rand(0, $charsCount)];
+            if (in_array($symbol, $ignoreSymbols, true)) {
+                while (in_array($symbol, $ignoreSymbols, true)) {
+                    $symbol = self::$alphabet[rand(0, $charsCount)];
+                }
+            }
             if ($registry) {
-                $str .= self::$alphabet[rand(0, $charsCount)];
+                $str .= $symbol;
             } else {
-                $str .= strtolower(self::$alphabet[rand(0, $charsCount)]);
+                $str .= strtolower($symbol);
             }
         }
         return $str;

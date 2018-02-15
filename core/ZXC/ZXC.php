@@ -69,15 +69,17 @@ class ZXC
             $routeHandler = $routeParams->executeRoute($this);
             $body = ob_get_clean();
         } catch (\InvalidArgumentException $e) {
-            $this->writeLog($e->getMessage());
+            $errorId = uniqid();
+            $this->writeLog($e->getMessage() . ' |---> ' . $errorId);
             ob_end_clean();
             $body = '';
-            $routeHandler = '';
+            $routeHandler = ['status' => 500, 'error' => $errorId];
         } catch (\Exception $e) {
-            $this->writeLog($e->getMessage());
+            $errorId = uniqid();
+            $this->writeLog($e->getMessage() . ' |---> ' . $errorId);
             ob_end_clean();
             $body = '';
-            $routeHandler = '';
+            $routeHandler = ['status' => 500, 'error' => $errorId];
         }
 
         echo json_encode(['status' => 200, 'body' => $body, 'handler' => $routeHandler]);
