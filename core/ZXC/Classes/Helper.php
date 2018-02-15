@@ -15,6 +15,71 @@ class Helper
 {
     use Singleton;
 
+    public static $alphabet = [
+        'a',
+        'A',
+        'b',
+        'B',
+        'c',
+        'C',
+        'd',
+        'D',
+        'e',
+        'E',
+        'f',
+        'F',
+        'g',
+        'G',
+        'h',
+        'H',
+        'i',
+        'I',
+        'j',
+        'J',
+        'k',
+        'K',
+        'l',
+        'L',
+        'm',
+        'M',
+        'n',
+        'N',
+        'o',
+        'O',
+        'p',
+        'P',
+        'q',
+        'Q',
+        'r',
+        'R',
+        's',
+        'S',
+        't',
+        'T',
+        'u',
+        'U',
+        'v',
+        'V',
+        'w',
+        'W',
+        'z',
+        'Z',
+        'Y',
+        'y',
+        'x',
+        'X',
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+        '0'
+    ];
+
     public static function isAssoc($arr)
     {
         if (array() === $arr) {
@@ -107,5 +172,20 @@ class Helper
     public static function getResponse(int $code = 500, array $data = [])
     {
         return ['status' => $code, 'data' => $data];
+    }
+
+    public static function generateRandomText($minLength, $maxLength, $registry = true)
+    {
+        $charsCount = count(self::$alphabet) - 1;
+        $length = rand($minLength, $maxLength);
+        $str = '';
+        for ($i = 0; $i < $length; $i++) {
+            if ($registry) {
+                $str .= self::$alphabet[rand(0, $charsCount)];
+            } else {
+                $str .= strtolower(self::$alphabet[rand(0, $charsCount)]);
+            }
+        }
+        return $str;
     }
 }

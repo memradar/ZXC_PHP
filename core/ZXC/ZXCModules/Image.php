@@ -4,6 +4,7 @@ namespace ZXC\ZXCModules;
 
 
 use ZXC\Classes\FS;
+use ZXC\Classes\Helper;
 
 class Image
 {
@@ -46,21 +47,38 @@ class Image
 
     }
 
-    public function captcha($width = 200, $height = 100, $text = '', $font = false)
+    public function captcha($width = 300, $height = 100, $text = '', $fontFile = false)
     {
+        $text = Helper::generateRandomText(8, 10);
+        $fontFile = ZXC_ROOT . '/../../log/times_new_yorker.ttf';
 
-        $count = $width / 5;
+        $charsCount = strlen($text);
+        $chars = str_split($text);
+        $blockImageWidth = $width / $charsCount;
         $dst_image = imagecreatetruecolor($width, $height);
-        for ($i = 0; $i < 7; $i++) {
-            $src_image = imagecreatetruecolor($count, $height);
-            $color = imagecolorallocate($src_image, mt_rand(0, 255), mt_rand(0, 255), mt_rand(0, 255));
-            imagettftext($src_image, 30, 0, 0, mt_rand(30, 40), $color, ZXC_ROOT . '/../../log/times_new_yorker.ttf', "$i");
+        $fontSize = $blockImageWidth / 1.5;
+        for ($i = 0; $i < $charsCount; $i++) {
+
+            $src_image = imagecreatetruecolor($blockImageWidth, $height);
+
+            $R = mt_rand(0, 255);
+            $G = mt_rand(0, 255);
+            $B = mt_rand(0, 255);
+
+            $backgroundColor = imagecolorallocate($src_image, 255 - $R, 255 - $G, 255 - $B);
+            imagefill($src_image, 0, 0, $backgroundColor);
+            $angle = mt_rand(-45, 45);
+            $bbox = imagettfbbox($fontSize, $angle, $fontFile, $chars[$i]);
+            $fontX = ceil(($blockImageWidth - $bbox[2]) / 2);
+            $fontY = ceil(($height - $bbox[7]) / 2);
+            $charColor = imagecolorallocate($src_image, $R, $G, $B);
+            imagettftext($src_image, $fontSize, $angle, $fontX, $fontY, $charColor, $fontFile, $chars[$i]);
             $src_w = imagesx($src_image);
             $src_h = imagesy($src_image);
             imagecopyresized(
                 $dst_image,
                 $src_image,
-                ($i > 0 ? $i * $count : 0),
+                ($i > 0 ? $i * $blockImageWidth : 0),
                 0,
                 0,
                 0,
