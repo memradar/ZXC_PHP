@@ -534,4 +534,11 @@ class User
         $result = $this->mailer->addTo($userName, $userEmail)->setSubject($subject)->setBody($body)->send();
         return $result;
     }
+
+    public function getLogin(){
+        if(isset($this->data['login'])){
+            return $this->data['login'];
+        }
+        return false;
+    }
 }

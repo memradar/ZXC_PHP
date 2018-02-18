@@ -72,11 +72,6 @@ class Session
         session_set_cookie_params($this->lifeTime, $this->path, $this->domain);
         $this->start();
         $this->sess = &$_SESSION;
-        if (!isset($this->sess[$this->prefix])) {
-            $this->sess[$this->prefix] = [];
-            $this->set('id', session_id());
-            $this->set('start', $this->getTime());
-        }
     }
 
     /**
@@ -135,25 +130,11 @@ class Session
 
     /**
      * Check session is enabled
-     * @return bool
+     * @return int
      */
     public function isEnabled()
     {
-        if (($this->getTime() - $this->get('start')) > $this->lifeTime) {
-            $this->clear();
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    /**
-     * Get current Unix timestamp
-     * @return int
-     */
-    public function getTime()
-    {
-        return time();
+        return session_status();
     }
 
     public function destroy()

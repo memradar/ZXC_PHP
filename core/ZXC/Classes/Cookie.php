@@ -26,10 +26,11 @@ class Cookie
 
     public static function set($name, $value, $expire)
     {
-        if (!setcookie($name, $value, time() + $expire, '/')) {
-            return true;
+        $time = time();
+        if (!setcookie($name, $value, $time + $expire, '/')) {
+            return false;
         }
-        return false;
+        return true;
     }
 
     public static function delete($name)
