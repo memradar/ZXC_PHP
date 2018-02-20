@@ -1,0 +1,11 @@
+@startuml
+
+class User{
+    # string firstName
+    # string lastName
+    # string email
+    # array data[]
+
+}
+
+@enduml
